@@ -5,13 +5,10 @@ from engine import colors, image, mouse
 import random, sys
 
 
-terrain = [
-    [0] * 100 for _ in range(100)
-]
-terrain[2][2] = 1
-terrain[2][3] = 1
-terrain[2][4] = 1
-terrain[3][4] = 1
+terrain = []
+with open("resources/terrain.txt", 'r') as file:
+    for line in file.readlines():
+        terrain.append([int(c) for c in line.strip()])
 
 # terrain = [
 #     [1, 1],
@@ -30,6 +27,7 @@ class Game(Scene):
     def generate_map(self):
         grass = image.load_image("ground_textured")
         water = image.load_image("water")
+        trees = image.load_image("ground_trees")
         grass_tiles = [pygame.transform.flip(grass, bool(n % 2), bool(n // 2)) for n in range(4)]
         water_tiles = [pygame.transform.flip(water, bool(n % 2), bool(n // 2)) for n in range(4)]
 
@@ -44,8 +42,11 @@ class Game(Scene):
                 px = (w // 2) + (x - y) * 80
                 py = 42 + (x + y) * 42
                 r = pygame.Rect(0, 0, 160, 84).move_to(center=(px, py))
-                images = grass_tiles if cell == 0 else water_tiles
-                img = images[random.randint(0, 3)]
+                if cell == 2:
+                    img = trees
+                else:
+                    images = grass_tiles if cell == 1 else water_tiles
+                    img = images[random.randint(0, 3)]
                 surface.blit(img, r)
         return surface
     
