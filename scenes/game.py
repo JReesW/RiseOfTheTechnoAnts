@@ -2,47 +2,51 @@ import pygame
 from engine.scene import Scene
 from engine import colors, image, mouse
 
-from game.bee import Bee, BeeStream
-from game.swirl import HoneySwirl
+
+terrain = [
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 1, 1, 1, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+]
 
 
 class Game(Scene):
     def __init__(self, *args, **kwargs):
-        image.load_image("bee0")
-        image.load_image("bee1")
+        self.grass_tile = image.load_image("grass_tile")
+        self.water_tile = image.load_image("water_tile")
 
-        self.ticks = 0
-        self.space_held = False
+        self.map = self.generate_map()
 
-        self.bees = BeeStream()
-        # self.swirls = pygame.sprite.Group(
-        #     HoneySwirl((400, 400), True),
-        #     HoneySwirl((1000, 800), False)
-        # )
-        self.repels = [
-            (1400, 700),
-            (800, 200)
-        ]
+    def generate_map(self):
+        n = len(terrain)
+        w, h = n * 82, n * 41  # based on a 80x42 tile sprite
+        surface = pygame.Surface((w, h), pygame.SRCALPHA)
+
+        for y, row in enumerate(terrain):
+            for x, cell in enumerate(row):
+                px = (w / 2) + (x - y) * 41
+                py = 20 + (x + y) * 20
+                r = pygame.Rect(0, 0, 82, 41).move_to(center=(px, py))
+                img = self.grass_tile if cell == 0 else self.water_tile
+                surface.blit(img, r)
+        return surface
     
     def handle_events(self, events):
         for event in events:
             if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
-                self.space_held = not self.space_held
+                pass
                 
     def update(self, dt):
-        self.ticks += 1
-
-        if self.space_held and self.ticks % 6 == 0:
-            x, y = mouse.mousepos()
-            self.bees.add(Bee((x-16, y-16), 0))
-
-        self.bees.update(self.repels)
-        # self.swirls.update() 
+        pass
 
     def render(self, surface):
-        surface.fill(colors.forest_green)
+        surface.fill(colors.black)
 
-        self.bees.draw(surface)
-        for repel in self.repels:
-            pygame.draw.circle(surface, colors.red, repel, 10)
-        # self.swirls.draw(surface)
+        surface.blit(self.map, pygame.Rect(0, 0, *self.map.get_size()).move_to(center=(960, 540)))

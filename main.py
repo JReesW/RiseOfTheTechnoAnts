@@ -18,7 +18,7 @@ SCALE = pygame.Vector2(SCALED_WIDTH / SCREEN_WIDTH, SCALED_HEIGHT / SCREEN_HEIGH
 
 screen = pygame.display.set_mode(
     SCALED_SIZE,
-    pygame.FULLSCREEN
+    # pygame.FULLSCREEN
 )
 pygame.display.set_caption("Pygame project")
 
