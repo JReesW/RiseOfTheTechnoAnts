@@ -1,47 +1,69 @@
 import pygame
-from engine.scene import Scene
+from engine.scene import Scene, Camera
 from engine import colors, image, mouse
+
+import random, sys
 
 
 terrain = [
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 1, 1, 1, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0] * 100 for _ in range(100)
 ]
+terrain[2][2] = 1
+terrain[2][3] = 1
+terrain[2][4] = 1
+terrain[3][4] = 1
+
+# terrain = [
+#     [1, 1],
+#     [0, 0]
+# ]
 
 
 class Game(Scene):
-    def __init__(self, *args, **kwargs):
-        self.grass_tile = image.load_image("grass_tile")
-        self.water_tile = image.load_image("water_tile")
+    def __init__(self):
+        self.window_size = pygame.display.get_surface().get_size()
 
         self.map = self.generate_map()
-
+        self.camera = Camera((8000, 4200), x_bounds=(0, 16000 - 1920), y_bounds=(0, 8400 - 1080))
+        self.cam_speed = 10
+        
     def generate_map(self):
+        grass = image.load_image("ground_textured")
+        water = image.load_image("water")
+        grass_tiles = [pygame.transform.flip(grass, bool(n % 2), bool(n // 2)) for n in range(4)]
+        water_tiles = [pygame.transform.flip(water, bool(n % 2), bool(n // 2)) for n in range(4)]
+
         n = len(terrain)
-        w, h = n * 82, n * 41  # based on a 80x42 tile sprite
+        w, h = n * 160, n * 84  # based on a 82x39 tile sprite
+        print(f"Generating terrain image of {w} x {h} pixels")
         surface = pygame.Surface((w, h), pygame.SRCALPHA)
+        print(f"Terrain image is {surface.get_bytesize() * w * h} bytes")
 
         for y, row in enumerate(terrain):
             for x, cell in enumerate(row):
-                px = (w / 2) + (x - y) * 41
-                py = 20 + (x + y) * 20
-                r = pygame.Rect(0, 0, 82, 41).move_to(center=(px, py))
-                img = self.grass_tile if cell == 0 else self.water_tile
+                px = (w // 2) + (x - y) * 80
+                py = 42 + (x + y) * 42
+                r = pygame.Rect(0, 0, 160, 84).move_to(center=(px, py))
+                images = grass_tiles if cell == 0 else water_tiles
+                img = images[random.randint(0, 3)]
                 surface.blit(img, r)
         return surface
     
     def handle_events(self, events):
+        mouse = pygame.mouse.get_pos()
+
         for event in events:
             if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
                 pass
+
+        if mouse[1] > self.window_size[1] - 20:
+            self.camera.move(0, self.cam_speed)
+        elif mouse[1] < 20:
+            self.camera.move(0, -self.cam_speed)
+        if mouse[0] > self.window_size[0] - 20:
+            self.camera.move(self.cam_speed, 0)
+        elif mouse[0] < 20:
+            self.camera.move(-self.cam_speed, 0)
                 
     def update(self, dt):
         pass
@@ -49,4 +71,4 @@ class Game(Scene):
     def render(self, surface):
         surface.fill(colors.black)
 
-        surface.blit(self.map, pygame.Rect(0, 0, *self.map.get_size()).move_to(center=(960, 540)))
+        surface.blit(self.map, (0, 0), self.camera.rect)

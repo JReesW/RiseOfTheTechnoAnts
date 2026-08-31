@@ -18,9 +18,9 @@ SCALE = pygame.Vector2(SCALED_WIDTH / SCREEN_WIDTH, SCALED_HEIGHT / SCREEN_HEIGH
 
 screen = pygame.display.set_mode(
     SCALED_SIZE,
-    # pygame.FULLSCREEN
+    pygame.FULLSCREEN
 )
-pygame.display.set_caption("Pygame project")
+pygame.display.set_caption("Rise of the Techno-Ants")
 
 
 FPS = 60
@@ -58,6 +58,7 @@ while running:
     if debug.is_active():
         debug.render(surface)
 
+    # screen.blit(surface, (0, 0))
     screen.blit(pygame.transform.scale(surface, SCALED_SIZE), (0, 0))
 
     # Draw the surface to the screen
