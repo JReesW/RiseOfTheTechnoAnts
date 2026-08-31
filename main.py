@@ -1,12 +1,13 @@
 import sys
 from pathlib import Path
 import pygame
+from pygame import freetype
 
 from engine import debug, director, mouse
 from engine.util import get_path
 
 pygame.init()
-pygame.freetype.init()
+freetype.init()
 
 
 display_info = pygame.display.Info()
@@ -17,9 +18,8 @@ SCALE = pygame.Vector2(SCALED_WIDTH / SCREEN_WIDTH, SCALED_HEIGHT / SCREEN_HEIGH
 
 
 screen = pygame.display.set_mode(
-    SCALED_SIZE,
-    pygame.FULLSCREEN
-)
+    SCALED_SIZE
+) #re-add pygame.FULLSCREEN
 pygame.display.set_caption("Pygame project")
 
 
@@ -28,7 +28,7 @@ clock = pygame.time.Clock()
 running = True
 
 director.find_scenes()
-director.change_scene("Game")
+director.change_scene("BiomesScene")
 director._set_scene()
 
 surface = pygame.Surface(SCREEN_SIZE, pygame.SRCALPHA)
