@@ -1,6 +1,7 @@
 import pygame
 from engine.scene import Scene, Camera
-from engine import colors, image, mouse, debug
+from engine import colors, image
+from settings import SCREEN_SIZE, SCREEN_HEIGHT, SCREEN_WIDTH
 
 from game import isometric
 
@@ -17,12 +18,13 @@ class Game(Scene):
     def __init__(self):
         isometric.initialize_isometry(len(terrain), 160, 84)
         
-        self.window_size = pygame.display.get_surface().get_size()
         self.selector_image = image.load_image("selector")
         self.selector = (0, 0)
 
         self.map = self.generate_map()
-        self.camera = Camera((7040, 200), x_bounds=(0, 16000 - 1920), y_bounds=(0, 8400 - 1080))
+
+        map_w, map_h = isometric.get_world_size()
+        self.camera = Camera((7040, 200), screen_size=SCREEN_SIZE, x_bounds=(0, map_w - SCREEN_WIDTH), y_bounds=(0, map_h - SCREEN_HEIGHT))
         self.cam_speed = 10
         
     def generate_map(self):
@@ -54,11 +56,11 @@ class Game(Scene):
             if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
                 pass
 
-        if mouse[1] > self.window_size[1] - 20:
+        if mouse[1] > SCREEN_HEIGHT - 20:
             self.camera.move(0, self.cam_speed)
         elif mouse[1] < 20:
             self.camera.move(0, -self.cam_speed)
-        if mouse[0] > self.window_size[0] - 20:
+        if mouse[0] > SCREEN_WIDTH - 20:
             self.camera.move(self.cam_speed, 0)
         elif mouse[0] < 20:
             self.camera.move(-self.cam_speed, 0)
