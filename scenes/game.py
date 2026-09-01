@@ -1,8 +1,10 @@
 import pygame
 from engine.scene import Scene, Camera
-from engine import colors, image, mouse
+from engine import colors, image, mouse, debug
 
-import random, sys
+from game import isometric
+
+import random
 
 
 terrain = []
@@ -10,18 +12,17 @@ with open("resources/terrain.txt", 'r') as file:
     for line in file.readlines():
         terrain.append([int(c) for c in line.strip()])
 
-# terrain = [
-#     [1, 1],
-#     [0, 0]
-# ]
-
 
 class Game(Scene):
     def __init__(self):
+        isometric.initialize_isometry(len(terrain), 160, 84)
+        
         self.window_size = pygame.display.get_surface().get_size()
+        self.selector_image = image.load_image("selector")
+        self.selector = (0, 0)
 
         self.map = self.generate_map()
-        self.camera = Camera((8000, 4200), x_bounds=(0, 16000 - 1920), y_bounds=(0, 8400 - 1080))
+        self.camera = Camera((7040, 200), x_bounds=(0, 16000 - 1920), y_bounds=(0, 8400 - 1080))
         self.cam_speed = 10
         
     def generate_map(self):
@@ -31,16 +32,12 @@ class Game(Scene):
         grass_tiles = [pygame.transform.flip(grass, bool(n % 2), bool(n // 2)) for n in range(4)]
         water_tiles = [pygame.transform.flip(water, bool(n % 2), bool(n // 2)) for n in range(4)]
 
-        n = len(terrain)
-        w, h = n * 160, n * 84  # based on a 82x39 tile sprite
-        print(f"Generating terrain image of {w} x {h} pixels")
+        w, h = isometric.get_world_size()
         surface = pygame.Surface((w, h), pygame.SRCALPHA)
-        print(f"Terrain image is {surface.get_bytesize() * w * h} bytes")
 
         for y, row in enumerate(terrain):
             for x, cell in enumerate(row):
-                px = (w // 2) + (x - y) * 80
-                py = 42 + (x + y) * 42
+                px, py = isometric.tile_to_world_coords(x, y)
                 r = pygame.Rect(0, 0, 160, 84).move_to(center=(px, py))
                 if cell == 2:
                     img = trees
@@ -65,6 +62,8 @@ class Game(Scene):
             self.camera.move(self.cam_speed, 0)
         elif mouse[0] < 20:
             self.camera.move(-self.cam_speed, 0)
+
+        self.selector = isometric.screen_coords_to_tile(*mouse, self.camera)
                 
     def update(self, dt):
         pass
@@ -73,3 +72,8 @@ class Game(Scene):
         surface.fill(colors.black)
 
         surface.blit(self.map, (0, 0), self.camera.rect)
+
+        if 0 <= self.selector[0] < 100 and 0 <= self.selector[1] < 100:
+            px, py = isometric.tile_to_screen_coords(*self.selector, self.camera)
+            r = pygame.Rect(0, 0, 160, 84).move_to(center=(px, py))
+            surface.blit(self.selector_image, r)
