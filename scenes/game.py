@@ -1,9 +1,9 @@
 import pygame
 from engine.scene import Scene, Camera
-from engine import colors, image
+from engine import colors, image, debug
 from settings import SCREEN_SIZE, SCREEN_HEIGHT, SCREEN_WIDTH
 
-from game import isometric
+from game import isometric, maps
 
 import random
 
@@ -21,40 +21,19 @@ class Game(Scene):
         self.selector_image = image.load_image("selector")
         self.selector = (0, 0)
 
-        self.map = self.generate_map()
+        self.map = maps.generate_map(terrain)
 
         map_w, map_h = isometric.get_world_size()
-        self.camera = Camera((7040, 200), screen_size=SCREEN_SIZE, x_bounds=(0, map_w - SCREEN_WIDTH), y_bounds=(0, map_h - SCREEN_HEIGHT))
+        self.camera = Camera((7040, 0), screen_size=SCREEN_SIZE, x_bounds=(0, map_w - SCREEN_WIDTH), y_bounds=(0, map_h - SCREEN_HEIGHT))
         self.cam_speed = 10
-        
-    def generate_map(self):
-        grass = image.load_image("ground_textured")
-        water = image.load_image("water")
-        trees = image.load_image("ground_trees")
-        grass_tiles = [pygame.transform.flip(grass, bool(n % 2), bool(n // 2)) for n in range(4)]
-        water_tiles = [pygame.transform.flip(water, bool(n % 2), bool(n // 2)) for n in range(4)]
-
-        w, h = isometric.get_world_size()
-        surface = pygame.Surface((w, h), pygame.SRCALPHA)
-
-        for y, row in enumerate(terrain):
-            for x, cell in enumerate(row):
-                px, py = isometric.tile_to_world_coords(x, y)
-                r = pygame.Rect(0, 0, 160, 84).move_to(center=(px, py))
-                if cell == 2:
-                    img = trees
-                else:
-                    images = grass_tiles if cell == 1 else water_tiles
-                    img = images[random.randint(0, 3)]
-                surface.blit(img, r)
-        return surface
     
     def handle_events(self, events):
         mouse = pygame.mouse.get_pos()
 
         for event in events:
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
-                pass
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_SPACE:
+                    pass
 
         if mouse[1] > SCREEN_HEIGHT - 20:
             self.camera.move(0, self.cam_speed)
@@ -73,7 +52,9 @@ class Game(Scene):
     def render(self, surface):
         surface.fill(colors.black)
 
-        surface.blit(self.map, (0, 0), self.camera.rect)
+        for rect, surf in self.map:
+            if rect.colliderect(self.camera.rect):
+                surface.blit(surf, (rect.left - self.camera.rect.left, rect.top - self.camera.rect.top))
 
         if 0 <= self.selector[0] < 100 and 0 <= self.selector[1] < 100:
             px, py = isometric.tile_to_screen_coords(*self.selector, self.camera)

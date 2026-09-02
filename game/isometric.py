@@ -11,7 +11,7 @@ from engine.scene import Camera
 from math import floor
 
 
-settings = {
+__settings = {
     "dimension": None,
     "tile_width": None,
     "tile_height": None,
@@ -26,20 +26,30 @@ def initialize_isometry(dimension: int, tile_width: int, tile_height: int):
      - tile_width   ->  the width of a tile image in pixels
      - tile_height  ->  the height of a tile image in pixels
     """
-    settings["dimension"] = dimension
-    settings["tile_width"] = tile_width
-    settings["tile_height"] = tile_height
-    settings["initialized"] = True
+    __settings["dimension"] = dimension
+    __settings["tile_width"] = tile_width
+    __settings["tile_height"] = tile_height
+    __settings["initialized"] = True
 
 
-def tile_to_world_coords(x: int, y: int) -> tuple[int, int]:
+def tile_size() -> tuple[int, int]:
+    """
+    Return the pixel size of the tiles
+    """
+    if not __settings["initialized"]:
+            raise Exception("Please initialize the isometry settings before using")
+
+    return __settings["tile_width"], __settings["tile_height"]
+    
+
+def tile_to_world_coords(x: int, y: int, world_size: tuple[int, int] = None) -> tuple[int, int]:
     """
     Return the center of a tile in world coordinates
     """
-    if not settings["initialized"]:
+    if not __settings["initialized"]:
         raise Exception("Please initialize the isometry settings before using")
 
-    w, _ = get_world_size()
+    w, _ = get_world_size() if world_size is None else world_size
     px = (w // 2) + (x - y) * 80
     py = 42 + (x + y) * 42
     return px, py
@@ -57,10 +67,10 @@ def get_world_size() -> tuple[int, int]:
     """
     Return the world size
     """
-    if not settings["initialized"]:
+    if not __settings["initialized"]:
         raise Exception("Please initialize the isometry settings before using")
 
-    return settings["dimension"] * settings["tile_width"], settings["dimension"] * settings["tile_height"]
+    return __settings["dimension"] * __settings["tile_width"], __settings["dimension"] * __settings["tile_height"]
 
 
 def screen_coords_to_tile(x: int, y: int, camera: Camera) -> tuple[int, int]:
