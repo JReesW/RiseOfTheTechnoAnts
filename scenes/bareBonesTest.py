@@ -4,12 +4,12 @@ from engine import colors, image, mouse, debug, director
 
 import numpy as np
 
-from game.noiseHelper import generate_noise_map, noise_map_to_rgb
+from game.noiseHelper import generate_noise_map, noise_map_to_rgb, normalize_noise_map
 from game import terrain
 
 import time
 
-class BiomesScene(Scene):
+class BBTScene(Scene):
     def __init__(self, *args, **kwargs):
         self.width = 100
         self.height = 100
@@ -30,13 +30,22 @@ class BiomesScene(Scene):
 
     def update_map(self):
         start = time.perf_counter()
-        self.terrain = terrain.create_terrain(self.width, self.height, self.seed)
+        # altitude_map = generate_noise_map(self.width, self.height, self.seed, octaves=1, frequency=0.05)
 
-        biome_array = np.array(self.terrain.grid)
+        # def is_lake(x):
+        #     return 1.0 if x < 0 else -1.0
 
-        pixel_array = self.biomes[biome_array]
+        # lake_check = np.vectorize(is_lake)
 
-        self.map = pygame.surfarray.make_surface(pixel_array)
+        # altitude_map = lake_check(altitude_map)
+        y, x = np.indices((self.height, self.width))
+        nx = (x - self.width / 2) / (self.width / 2)
+        ny = (y - self.height / 2) / (self.height / 2)
+    
+        altitude_map = np.minimum(1, (nx**2 + ny**2) / np.sqrt(2))
+        altitude_map = noise_map_to_rgb(altitude_map)
+
+        self.map = pygame.surfarray.make_surface(altitude_map)
 
         print(f"everything complete: {time.perf_counter() - start}")
 
@@ -54,7 +63,7 @@ class BiomesScene(Scene):
                     self.seed -= 1
                     self.update_map()
                 elif event.key == pygame.K_RETURN:
-                    director.change_scene("BBTScene")
+                    director.change_scene("BiomesScene")
                     director._set_scene()
 
     def update(self, dt):
