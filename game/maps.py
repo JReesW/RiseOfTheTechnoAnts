@@ -63,8 +63,4 @@ def generate_map(terrain: list[list[int]]) -> list[tuple[pygame.Rect, pygame.Sur
         for cx  in range(n // 10):
             chunks.append(generate_chunk(terrain, cx, cy))
 
-    for e in chunks:
-        print(e)
-    print(f"There are {len(chunks)} chunks")
-
     return chunks
