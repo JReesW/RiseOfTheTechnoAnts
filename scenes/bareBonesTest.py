@@ -30,19 +30,7 @@ class BBTScene(Scene):
 
     def update_map(self):
         start = time.perf_counter()
-        # altitude_map = generate_noise_map(self.width, self.height, self.seed, octaves=1, frequency=0.05)
-
-        # def is_lake(x):
-        #     return 1.0 if x < 0 else -1.0
-
-        # lake_check = np.vectorize(is_lake)
-
-        # altitude_map = lake_check(altitude_map)
-        y, x = np.indices((self.height, self.width))
-        nx = (x - self.width / 2) / (self.width / 2)
-        ny = (y - self.height / 2) / (self.height / 2)
-    
-        altitude_map = np.minimum(1, (nx**2 + ny**2) / np.sqrt(2))
+        altitude_map = generate_noise_map(self.width, self.height, self.seed, octaves=1, frequency=0.5)
         altitude_map = noise_map_to_rgb(altitude_map)
 
         self.map = pygame.surfarray.make_surface(altitude_map)

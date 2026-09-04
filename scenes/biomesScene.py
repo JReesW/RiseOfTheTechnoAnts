@@ -24,6 +24,8 @@ class BiomesScene(Scene):
             [34, 139, 34], # forest
             [255, 0, 0], #team1
             [0, 0, 255], #team2
+            [141, 176, 53], #bushes
+            [242, 115, 61], #ores
         ], dtype=np.uint8)
 
         self.update_map()

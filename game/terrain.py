@@ -7,7 +7,7 @@ from game.noiseHelper import generate_noise_map, normalize_noise_map
 
 import numpy as np
 
-#IDs [water, plains, forest, team1, team2]
+#IDs [water, plains, forest, team1, team2, bushes, ores]
 
 def create_terrain(width: int, height: int, seed: int):
     start = time.perf_counter()
@@ -22,9 +22,10 @@ def create_terrain(width: int, height: int, seed: int):
     # make middle of map lower
     edge_distance = np.where(edge_distance < 0.2, edge_distance_normal * -0.025, edge_distance)
 
+    altitude_map = normalize_noise_map(generate_noise_map(width, height, seed << 42, octaves=1, frequency=0.05))
+    greenery_map = normalize_noise_map(generate_noise_map(width, height, seed << 16, octaves=1, frequency=0.15))
 
-    altitude_map = normalize_noise_map(generate_noise_map(width, height, seed, octaves=1, frequency=0.05))
-    greenery_map = normalize_noise_map(generate_noise_map(width, height, seed, octaves=1, frequency=0.15))
+    resource_map = normalize_noise_map(generate_noise_map(width, height, seed << 24, octaves=1, frequency=0.5))
 
     print(f"noise map made: {time.perf_counter() - start}")
 
@@ -35,6 +36,12 @@ def create_terrain(width: int, height: int, seed: int):
     forest_bonus = 0.15
     # water level plus drop off and if altitude is lower than that number it gets the bonus chance
     forest_bonus_dropoff = 0.10
+
+    bush_resource_level = 0.15
+    bush_altitude_level = 0.5
+
+    ore_resource_level = 0.2
+    ore_altitude_level = 0.75
 
     # apply the edge distance map as effectively a slope map, then normilize it
     altitude_map += edge_distance * water_level
@@ -66,6 +73,8 @@ def create_terrain(width: int, height: int, seed: int):
             altitude = altitude_map[y, x]
             greenery = greenery_map[y, x]
 
+            resource = resource_map[y, x]
+
             forest_chance = base_forest_chance
 
             if (altitude > water_level and altitude < water_level + forest_bonus_dropoff):
@@ -75,6 +84,10 @@ def create_terrain(width: int, height: int, seed: int):
                 grid[y][x] = 0
             elif altitude > water_level and greenery < forest_chance:
                 grid[y][x] = 2
+            elif greenery >= 0.5 and resource <= bush_resource_level and altitude <= bush_altitude_level:
+                grid[y][x] = 5
+            elif greenery < 0.5 and resource <= ore_resource_level and altitude > ore_altitude_level:
+                grid[y][x] = 6
             else:
                 grid[y][x] = 1
 
