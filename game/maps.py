@@ -12,6 +12,8 @@ import random
 ground = None
 water = None
 trees = None
+bush = None
+ore = None
 ground_tiles = None
 water_tiles = None
 
@@ -20,19 +22,21 @@ def load_images():
     """
     God I wanna do this differently, but for the time being...
     """
-    global ground, water, trees, ground_tiles, water_tiles
+    global ground, water, trees, bush, ore, ground_tiles, water_tiles
     ground = image.load_image("ground_textured")
     water = image.load_image("water")
     trees = image.load_image("ground_trees")
+    bush = image.load_image("ground_bush")
+    ore = image.load_image("ground_ore")
     ground_tiles = [pygame.transform.flip(ground, bool(n % 2), bool(n // 2)) for n in range(4)]
     water_tiles = [pygame.transform.flip(water, bool(n % 2), bool(n // 2)) for n in range(4)]
 
 
 def select_image(cell: int) -> pygame.Surface:
     if cell == 0: return water_tiles[random.randint(0, 3)]
-    if cell == 1: return ground_tiles[random.randint(0, 3)]
-    if cell == 2: return trees
-    return water
+    if cell == 5: return bush
+    if cell == 6: return ore
+    return ground_tiles[random.randint(0, 3)]
 
 
 def generate_chunk(terrain: list[list[int]], cx: int, cy: int) -> tuple[pygame.Rect, pygame.Surface]:

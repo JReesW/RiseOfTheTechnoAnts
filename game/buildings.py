@@ -1,6 +1,7 @@
 import pygame
 
 from engine import image
+from engine.scene import Camera
 from game import isometric
 from game.entities import Entity
 
@@ -25,6 +26,8 @@ class Building(Entity):
         ox = 80 if area == Area.TwoByTwo else 0  # offset the X from tile center on TwoByTwo
         self.rect = rect.move_to(centerx = px + ox, bottom = py + self.bottom_offset)
 
+        self.shadow = image.load_image(f"shadow{area}")
+
     def occupies_tile(self, tile: tuple[int, int]) -> bool:
         """
         Return whether this building occupies the given tile
@@ -45,6 +48,10 @@ class Building(Entity):
         if self.area == Area.TwoByTwo:
             return px + 80, py
         return px, py
+
+    def draw_shadow(self, surface: pygame.Surface, camera: Camera):
+        r = pygame.Rect(0, 0, *self.shadow.size).move_to(center=isometric.world_to_screen_coords(*self.get_center(), camera))
+        surface.blit(self.shadow, r)
 
 
 class Nexus(Building):

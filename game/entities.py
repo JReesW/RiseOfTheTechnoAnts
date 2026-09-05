@@ -1,5 +1,7 @@
 import pygame
+
 from engine.scene import Camera
+from game import isometric
 
 
 """
@@ -16,7 +18,13 @@ class Entities(pygame.sprite.LayeredUpdates):
         sprites: list[pygame.sprite.Sprite] = self.sprites()
         for sprite in sprites:
             if sprite.rect.colliderect(self.camera.rect):
-                surface.blit(sprite.image, (sprite.rect.left - self.camera.rect.left, sprite.rect.top - self.camera.rect.top), special_flags=special_flags)
+                surface.blit(sprite.image, isometric.world_to_screen_coords(*sprite.rect.topleft, self.camera), special_flags=special_flags)
+
+    def draw_shadows(self, surface, bgd = None, special_flags = 0):
+        sprites: list[Entity] = self.sprites()
+        for sprite in sprites:
+            if sprite.rect.colliderect(self.camera.rect):
+                sprite.draw_shadow(surface, self.camera)
 
 
 class Entity(pygame.sprite.Sprite):
@@ -27,3 +35,6 @@ class Entity(pygame.sprite.Sprite):
 
     def update(self):
         self.__layer = self.rect.bottom - self.bottom_offset
+
+    def draw_shadow(self, surface, camera):
+        pass

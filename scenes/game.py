@@ -3,7 +3,7 @@ from engine.scene import Scene, Camera
 from engine import colors, image, debug
 from settings import SCREEN_SIZE, SCREEN_HEIGHT, SCREEN_WIDTH
 
-from game import isometric, maps, entities, buildings
+from game import isometric, maps, entities, buildings, resources
 
 import random
 
@@ -13,7 +13,7 @@ class EntitySelected(Exception):
 
 
 terrain = []
-with open("resources/terrain.txt", 'r') as file:
+with open("resources/output.txt", 'r') as file:
     for line in file.readlines():
         terrain.append([int(c) for c in line.strip()])
 
@@ -34,14 +34,18 @@ class Game(Scene):
         self.camera = Camera((7040, 0), screen_size=SCREEN_SIZE, x_bounds=(0, map_w - SCREEN_WIDTH), y_bounds=(0, map_h - SCREEN_HEIGHT))
         self.cam_speed = 10
 
-        self.buildings: pygame.sprite.Group[buildings.Nexus] = pygame.sprite.Group()
+        self.buildings: pygame.sprite.Group[buildings.Building] = pygame.sprite.Group()
+        self.resources: pygame.sprite.Group[resources.Resource] = pygame.sprite.Group()
         self.entities = entities.Entities(self.camera)
+        self.populate_map()
         self.entities.add(
             buildings.Nexus((3, 3), self.buildings),
             buildings.Nexus((90, 90), self.buildings),
             buildings.Pod((3, 8), self.buildings),
             buildings.Farm((3, 13), self.buildings),
             buildings.Tower((7, 9), self.buildings),
+            buildings.Farm((10, 37), self.buildings),
+            buildings.Nexus((20, 35), self.buildings),
         )
         self.selected_entity = None
     
@@ -66,6 +70,7 @@ class Game(Scene):
             self.camera.move(-self.cam_speed, 0)
 
         self.selector = isometric.screen_coords_to_tile(*mouse, self.camera)
+        debug.debug("selector", self.selector)
                 
     def update(self, dt):
         pass
@@ -82,12 +87,12 @@ class Game(Scene):
             r = img.get_rect().move_to(center=isometric.world_to_screen_coords(*self.selected_entity.get_center(), self.camera))
             surface.blit(img, r)
             
-
         if 0 <= self.selector[0] < 100 and 0 <= self.selector[1] < 100:
             px, py = isometric.tile_to_screen_coords(*self.selector, self.camera)
             r = pygame.Rect(0, 0, 160, 84).move_to(center=(px, py))
             surface.blit(self.selector_image, r)
 
+        self.entities.draw_shadows(surface)
         self.entities.draw(surface)
 
     def select_entity(self):
@@ -102,3 +107,12 @@ class Game(Scene):
             pass
         else:
             self.selected_entity = None
+
+    def populate_map(self):
+        """
+        Add the resource entities to the world
+        """
+        for y, row in enumerate(terrain):
+            for x , cell in enumerate(row):
+                if cell == 2:
+                    self.entities.add(resources.Tree((x, y), self.resources))

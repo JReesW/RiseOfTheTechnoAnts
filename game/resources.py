@@ -1,0 +1,58 @@
+import pygame
+
+from engine import image
+from game.entities import Entity
+from game import isometric
+
+import random
+
+
+tree_offsets = [
+    (-10, 22),
+    (-22, -20),
+    (-50, 8),
+    (10, -18),
+    (25, 20),
+    (46, -12)
+]
+
+
+class Resource(Entity):
+    def __init__(self, pos: tuple[int, int], bottom_offset, *groups):
+        super().__init__(bottom_offset, *groups)
+        self.pos = pos
+        self.center = isometric.tile_to_world_coords(*pos)
+        self.shadow: pygame.Surface = None
+
+    def draw_shadow(self, surface, camera):
+        r = self.rect.move_to(center=isometric.world_to_screen_coords(self.center[0], self.center[1] - 37, camera))
+        surface.blit(self.shadow, r)
+
+
+class Tree(Resource):
+    def __init__(self, pos: tuple[int, int], *groups):
+        super().__init__(pos, 0, *groups)
+        self.center = isometric.tile_to_world_coords(*pos)
+
+        self.image = self.generate_trees()
+        self.rect = pygame.Rect(0, 0, *self.image.size).move_to(centerx=self.center[0], bottom=self.center[1]+20)
+
+    def generate_trees(self):
+        tree_imgs = [image.load_image("tree1"), image.load_image("tree2")]
+        offsets = random.sample(tree_offsets, random.randint(4, 5))
+        trees: list[tuple[pygame.Rect, int]] = []
+        for x, y in sorted(offsets, key=lambda p: p[1]):
+            rect = pygame.Rect(0, 0, 42, 84).move_to(centerx = x, bottom = y)
+            img = random.randint(0, 1)
+            trees.append((rect, img))
+        r1, *rects = [r for r, _ in trees]
+        totalrect = r1.unionall(rects)
+
+        self.shadow = pygame.Surface(totalrect.size, pygame.SRCALPHA)
+        surface = pygame.Surface(totalrect.size, pygame.SRCALPHA)
+        for rect, img in trees:
+            r = rect.move(-totalrect.left, -totalrect.top)
+            surface.blit(tree_imgs[img], r)
+            self.shadow.blit(image.load_image("treeshadow"), r)
+
+        return surface
