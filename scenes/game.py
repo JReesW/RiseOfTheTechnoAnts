@@ -23,6 +23,8 @@ class Game(Scene):
         isometric.initialize_isometry(len(terrain), 160, 84)
         
         self.selector_image = image.load_image("selector")
+        self.selected1_image = image.load_image("selected1")
+        self.selected2_image = image.load_image("selected2")
         self.selected3_image = image.load_image("selected3")
         self.selector = (0, 0)
 
@@ -37,6 +39,9 @@ class Game(Scene):
         self.entities.add(
             buildings.Nexus((3, 3), self.buildings),
             buildings.Nexus((90, 90), self.buildings),
+            buildings.Pod((3, 8), self.buildings),
+            buildings.Farm((3, 13), self.buildings),
+            buildings.Tower((7, 9), self.buildings),
         )
         self.selected_entity = None
     
@@ -73,9 +78,9 @@ class Game(Scene):
                 surface.blit(surf, (rect.left - self.camera.rect.left, rect.top - self.camera.rect.top))
 
         if self.selected_entity is not None:
-            px, py = isometric.tile_to_screen_coords(*self.selected_entity.pos, self.camera)
-            r = pygame.Rect(0, 0, 480, 252).move_to(center=(px, py))
-            surface.blit(self.selected3_image, r)
+            img = {1: self.selected1_image, 2: self.selected2_image, 3: self.selected3_image}[self.selected_entity.area]
+            r = img.get_rect().move_to(center=isometric.world_to_screen_coords(*self.selected_entity.get_center(), self.camera))
+            surface.blit(img, r)
             
 
         if 0 <= self.selector[0] < 100 and 0 <= self.selector[1] < 100:

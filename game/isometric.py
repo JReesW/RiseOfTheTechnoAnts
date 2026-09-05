@@ -63,6 +63,13 @@ def tile_to_screen_coords(x: int, y: int, camera: Camera) -> tuple[int, int]:
     return px - camera.rect.left, py - camera.rect.top
 
 
+def world_to_screen_coords(x: int, y: int, camera: Camera) -> tuple[int, int]:
+    """
+    Convert world coords to screen coords
+    """
+    return x - camera.rect.left, y - camera.rect.top
+
+
 def get_world_size() -> tuple[int, int]:
     """
     Return the world size
