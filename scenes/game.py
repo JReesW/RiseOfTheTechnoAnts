@@ -3,7 +3,7 @@ from engine.scene import Scene, Camera
 from engine import colors, image, debug
 from settings import SCREEN_SIZE, SCREEN_HEIGHT, SCREEN_WIDTH
 
-from game import isometric, maps, entities, buildings, resources
+from game import isometric, maps, entities, buildings, resources, units
 
 import random
 
@@ -36,6 +36,7 @@ class Game(Scene):
 
         self.buildings: pygame.sprite.Group[buildings.Building] = pygame.sprite.Group()
         self.resources: pygame.sprite.Group[resources.Resource] = pygame.sprite.Group()
+        self.units: pygame.sprite.Group[units.Unit] = pygame.sprite.Group()
         self.entities = entities.Entities(self.camera)
         self.populate_map()
         self.entities.add(
@@ -43,9 +44,11 @@ class Game(Scene):
             buildings.Nexus((90, 90), self.buildings),
             buildings.Pod((3, 8), self.buildings),
             buildings.Farm((3, 13), self.buildings),
-            buildings.Tower((7, 9), self.buildings),
+            buildings.Barracks((7, 9), self.buildings),
+            buildings.Siegery((7, 13), self.buildings),
             buildings.Farm((10, 37), self.buildings),
             buildings.Nexus((20, 35), self.buildings),
+            units.Worker(isometric.tile_to_world_coords(6, 3), self.units)
         )
         self.selected_entity = None
     
@@ -73,7 +76,7 @@ class Game(Scene):
         debug.debug("selector", self.selector)
                 
     def update(self, dt):
-        pass
+        self.units.update(dt)
 
     def render(self, surface):
         surface.fill(colors.black)

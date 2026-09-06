@@ -14,8 +14,11 @@ class Area(enum.IntEnum):
     ThreeByThree = 3
 
 
-# Add right offset too for 2x2 buildings?
 class Building(Entity):
+    """
+    Entities bound by the grid, their pos is tile-based
+    """
+
     def __init__(self, pos: tuple[int, int], image_name: str, bottom_offset: int, area: Area, *groups):
         super().__init__(bottom_offset, *groups)
         self.pos = pos
@@ -61,7 +64,7 @@ class Nexus(Building):
 
 class Pod(Building):
     def __init__(self, pos: tuple[int, int], *groups):
-        super().__init__(pos, "nexus2", 42, Area.TwoByTwo, *groups)
+        super().__init__(pos, "pod", 42, Area.TwoByTwo, *groups)
 
 
 class Tower(Building):
@@ -84,11 +87,11 @@ class Farm(Building):
 #         super().__init__(bottom_offset, *groups)
 
 
-# class Barracks(Building):
-#     def __init__(self, pos: tuple[int, int], *groups):
-#         super().__init__(bottom_offset, *groups)
+class Barracks(Building):
+    def __init__(self, pos: tuple[int, int], *groups):
+        super().__init__(pos, "barracks", 84, Area.ThreeByThree, *groups)
 
 
-# class Siegery(Building):
-#     def __init__(self, pos: tuple[int, int], *groups):
-#         super().__init__(bottom_offset, *groups)
+class Siegery(Building):
+    def __init__(self, pos: tuple[int, int], *groups):
+        super().__init__(pos, "siegery", 84, Area.ThreeByThree, *groups)

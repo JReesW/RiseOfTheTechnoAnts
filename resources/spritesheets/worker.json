@@ -1,0 +1,61 @@
+{
+	"usesColorKey": false,
+	"colorKey": "purple",
+	"flipAll": true,
+      "sprites": {
+            "Walk+X0": [0, 0, 48, 48],
+            "Walk+X1": [48, 0, 48, 48],
+            "Walk+X2": [96, 0, 48, 48],
+            "Walk+Y0": [0, 48, 48, 48],
+            "Walk+Y1": [48, 48, 48, 48],
+            "Walk+Y2": [96, 48, 48, 48],
+            "Walk-Y0": [0, 96, 48, 48],
+            "Walk-Y1": [48, 96, 48, 48],
+            "Walk-Y2": [96, 96, 48, 48],
+            "Walk-X0": [0, 144, 48, 48],
+            "Walk-X1": [48, 144, 48, 48],
+            "Walk-X2": [96, 144, 48, 48]
+      },
+      "animations": {
+            "Idle+X": {
+                  "frames": ["Walk+X0"],
+                  "frameDurations": [100],
+                  "loops": false
+            },
+            "Idle+Y": {
+                  "frames": ["Walk+Y2"],
+                  "frameDurations": [100],
+                  "loops": false
+            },
+            "Idle-Y": {
+                  "frames": ["Walk-Y0"],
+                  "frameDurations": [100],
+                  "loops": false
+            },
+            "Idle-X": {
+                  "frames": ["Walk-X2"],
+                  "frameDurations": [100],
+                  "loops": false
+            },
+            "Walk+X": {
+                  "frames": ["Walk+X0", "Walk+X1", "Walk+X2"],
+                  "frameDurations": [100, 100, 100],
+                  "loops": true
+            },
+            "Walk+Y": {
+                  "frames": ["Walk+Y0", "Walk+Y1", "Walk+Y2"],
+                  "frameDurations": [100, 100, 100],
+                  "loops": true
+            },
+            "Walk-Y": {
+                  "frames": ["Walk-Y0", "Walk-Y1", "Walk-Y2"],
+                  "frameDurations": [100, 100, 100],
+                  "loops": true
+            },
+            "Walk-X": {
+                  "frames": ["Walk-X0", "Walk-X1", "Walk-X2"],
+                  "frameDurations": [100, 100, 100],
+                  "loops": true
+            }
+      }
+}
