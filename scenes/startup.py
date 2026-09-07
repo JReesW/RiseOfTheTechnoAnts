@@ -1,6 +1,6 @@
 import pygame
 from engine.scene import Scene
-from engine import colors, image, mouse, debug, audio
+from engine import colors, image, mouse, debug, audio, director
 
 class Startup(Scene):
     def __init__(self, *args, **kwargs):
@@ -22,6 +22,9 @@ class Startup(Scene):
         if self.state == 0 and self.time >= 1:
             self.state = 1
             self.audio_handler.play_music("palmtune 8", loops=0)
+
+        if self.time > 4:
+            director.change_scene("Fade", self, "Game")
 
         debug.debug("time", self.time)
         debug.debug("state", self.state)
