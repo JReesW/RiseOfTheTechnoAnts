@@ -5,7 +5,7 @@ from settings import SCREEN_SIZE, SCREEN_HEIGHT, SCREEN_WIDTH
 
 from game import isometric, maps, entities, buildings, resources, units
 
-import random
+import random, math
 
 
 class EntitySelected(Exception):
@@ -26,7 +26,9 @@ class Game(Scene):
         self.selected1_image = image.load_image("selected1")
         self.selected2_image = image.load_image("selected2")
         self.selected3_image = image.load_image("selected3")
+        self.marker_image = image.load_image("marker")
         self.selector = (0, 0)
+        self.marker = None
 
         self.map = maps.generate_map(terrain)
 
@@ -48,7 +50,9 @@ class Game(Scene):
             buildings.Siegery((7, 13), self.buildings),
             buildings.Farm((10, 37), self.buildings),
             buildings.Nexus((20, 35), self.buildings),
-            units.Worker(isometric.tile_to_world_coords(6, 3), self.units)
+            units.Worker(isometric.tile_to_world_coords(6, 3), self.units),
+            units.Worker(isometric.tile_to_world_coords(6, 4), self.units),
+            units.Worker(isometric.tile_to_world_coords(6, 5), self.units)
         )
         self.selected_entity = None
     
@@ -63,9 +67,13 @@ class Game(Scene):
                         elif unit.direction == units.Direction.South: unit.direction = units.Direction.West
                         elif unit.direction == units.Direction.West: unit.direction = units.Direction.North
                         elif unit.direction == units.Direction.North: unit.direction = units.Direction.East
-            elif event.type == pygame.MOUSEBUTTONDOWN:
+            elif event.type == pygame.MOUSEBUTTONUP:
                 if event.button == 1:
-                    self.select_entity()
+                    self.select_entity(mouse)
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == 3:
+                    self.marker = (*isometric.screen_to_world_coords(*mouse, self.camera), 120)
+                    self.check_targeting()
 
         if mouse[1] > SCREEN_HEIGHT - 20:
             self.camera.move(0, self.cam_speed)
@@ -80,36 +88,65 @@ class Game(Scene):
         debug.debug("selector", self.selector)
                 
     def update(self, dt):
-        self.units.update(dt)
+        self.entities.update(dt)
+
+        if self.marker is not None:
+            x, y, t = self.marker
+            self.marker = (x, y, t-1) if t > 0 else None
 
     def render(self, surface):
         surface.fill(colors.black)
 
+        # Draw the map
         for rect, surf in self.map:
             if rect.colliderect(self.camera.rect):
                 surface.blit(surf, (rect.left - self.camera.rect.left, rect.top - self.camera.rect.top))
 
-        if self.selected_entity is not None:
-            img = {1: self.selected1_image, 2: self.selected2_image, 3: self.selected3_image}[self.selected_entity.area]
-            r = img.get_rect().move_to(center=isometric.world_to_screen_coords(*self.selected_entity.get_center(), self.camera))
-            surface.blit(img, r)
-            
+        # Draw the green indicator showing which entity is selected
+        match self.selected_entity:
+            case buildings.Building():
+                img = {1: self.selected1_image, 2: self.selected2_image, 3: self.selected3_image}[self.selected_entity.area]
+                r = img.get_rect().move_to(center=isometric.world_to_screen_coords(*self.selected_entity.get_center(), self.camera))
+                surface.blit(img, r)
+            case units.Unit():
+                img = image.load_image("selected_unit")
+                px, py = self.selected_entity.pos
+                r = img.get_rect().move_to(center=isometric.world_to_screen_coords(px, py + 10, self.camera))
+                surface.blit(img, r)
+
+        # Only draw the selector when in bounds 
         if 0 <= self.selector[0] < 100 and 0 <= self.selector[1] < 100:
             px, py = isometric.tile_to_screen_coords(*self.selector, self.camera)
             r = pygame.Rect(0, 0, 160, 84).move_to(center=(px, py))
             surface.blit(self.selector_image, r)
 
+        # Draw all entities and their shadows
         self.entities.draw_shadows(surface)
         self.entities.draw(surface)
 
-    def select_entity(self):
+        # Draw the walking-target marker
+        if self.marker is not None:
+            x, y, t = self.marker
+            px, py = isometric.world_to_screen_coords(x, y, self.camera)
+            r = self.marker_image.get_rect().move_to(centerx=px, bottom = py - math.sin(t / 10) * 10)
+            self.marker_image.set_alpha(255 if t > 20 else pygame.math.remap(20, 0, 255, 0, t))
+            surface.blit(self.marker_image, r)
+
+    def select_entity(self, mouse: tuple[int, int]):
+        """
+        Detect whether a building or unit is selected by a mouse click
+        """
         try:
             if 0 <= self.selector[0] < 100 and 0 <= self.selector[1] < 100:
+                for unit in self.units:
+                    screen_pos = isometric.world_to_screen_coords(*unit.pos, self.camera)
+                    if math.dist(screen_pos, mouse) < unit.size:
+                        self.selected_entity = unit
+                        raise EntitySelected
                 for building in self.buildings:
                     if building.occupies_tile(self.selector):
                         self.selected_entity = building
                         raise EntitySelected
-                # for unit in self.units
         except EntitySelected:
             pass
         else:
@@ -123,3 +160,11 @@ class Game(Scene):
             for x , cell in enumerate(row):
                 if cell == 2:
                     self.entities.add(resources.Tree((x, y), self.resources))
+
+    def check_targeting(self):
+        """
+        Check whether targeting can be passed onto the selected entity, and do so if it can
+        """
+        if isinstance(self.selected_entity, units.Unit):
+            x, y, _ = self.marker
+            self.selected_entity.set_target((x, y))

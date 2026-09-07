@@ -1,11 +1,13 @@
 import pygame
 
-from engine import image, spritesheet, animation
+from engine import image, spritesheet, animation, debug
 from engine.scene import Camera
 from game import isometric
 from game.entities import Entity
 
-import enum
+import enum, math
+
+hpi = math.pi / 2
 
 
 class State(enum.IntEnum):
@@ -31,25 +33,31 @@ class Unit(Entity):
     Entities not bound by the grid, their pos is pixel-based
     """
 
-    def __init__(self, pos: tuple[int, int], sheet_name: str, size: int, *groups):
+    def __init__(self, pos: tuple[int, int], sheet_name: str, size: int, speed: int, *groups):
         super().__init__(0, *groups)
         self.pos = pos
         self.size = size  # radial size
+        self.speed = speed
         self.state = State.Idle
         self.direction = Direction.East
+        self.target = None
 
         self.sheet = spritesheet.SpriteSheet(sheet_name)
         self.animation = animation.AnimationHandler(self.sheet)
+        self.image = self.sheet.get_sprite("Walk+X0")
 
         rect = pygame.Rect(0, 0, 48, 48)
         self.rect = rect.move_to(center=pos)
 
         self.shadow = image.load_image(f"antshadow")
 
+    def set_target(self, target: tuple[int, int]):
+        self.target = target
+
     def update(self, dt):
         self.update_state(dt)
         self.update_animation(dt)
-        super().update()
+        super().update(dt)
 
     def update_state(dt):
         pass
@@ -64,13 +72,31 @@ class Unit(Entity):
 
 class Worker(Unit):
     def __init__(self, pos: tuple[int, int], *groups):
-        super().__init__(pos, "worker", 20, *groups)
+        super().__init__(pos, "worker", 20, 3, *groups)
 
     def update_state(self, dt):
-        self.state = State.Walking
         self.animation.update(dt)
 
+        if self.target is not None:
+            if math.dist(self.pos, self.target) < self.speed:
+                self.target = None
+                self.state = State.Idle
+            else:
+                self.state = State.Walking
+                tx, ty = self.target
+                px, py = self.pos
+                theta = math.atan2(ty-py, tx-px)
+                dx, dy = round(math.cos(theta) * self.speed), round(math.sin(theta) * self.speed * (42/80))
+
+                if theta < -hpi: self.direction = Direction.West
+                elif theta < 0: self.direction = Direction.North
+                elif theta < hpi: self.direction = Direction.East
+                else: self.direction = Direction.South
+
+                self.pos = px + dx, py + dy
+                self.rect = self.rect.move_to(center=self.pos)
+
     def update_animation(self, dt):
-        if self.state == State.Idle: self.animation.play(f"Idle{self.state}")
+        if self.state == State.Idle: self.animation.play(f"Idle{self.direction}")
         elif self.state == State.Walking: self.animation.play(f"Walk{self.direction}")
         self.image = self.animation.get_frame()

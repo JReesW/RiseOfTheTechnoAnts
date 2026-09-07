@@ -14,6 +14,11 @@ class Entities(pygame.sprite.LayeredUpdates):
         super().__init__(*sprites, **kwargs)
         self.camera = camera
 
+    def add(self, *sprites, **kwargs):
+        for sprite in sprites:
+            sprite.entity_group = self
+        super().add(*sprites, **kwargs)
+
     def draw(self, surface, bgd = None, special_flags = 0):
         sprites: list[pygame.sprite.Sprite] = self.sprites()
         for sprite in sprites:
@@ -31,10 +36,13 @@ class Entity(pygame.sprite.Sprite):
     def __init__(self, bottom_offset: int, *groups):
         super().__init__(*groups)
         self.bottom_offset = bottom_offset
-        self.__layer = 0
+        self.entity_group: Entities = None
+        self.depth = 0
 
-    def update(self):
-        self.__layer = self.rect.bottom - self.bottom_offset
+    def update(self, dt):
+        self.depth = self.rect.bottom - self.bottom_offset
+        if self.depth != self.layer:
+            self.entity_group.change_layer(self, self.depth)
 
     def draw_shadow(self, surface, camera):
         pass
