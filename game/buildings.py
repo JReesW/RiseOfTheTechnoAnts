@@ -59,12 +59,12 @@ class Building(Entity):
 
 class Nexus(Building):
     def __init__(self, pos: tuple[int, int], *groups):
-        super().__init__(pos, "nexus", 84, Area.ThreeByThree, *groups)
+        super().__init__(pos, "nexus", 74, Area.ThreeByThree, *groups)
 
 
 class Pod(Building):
     def __init__(self, pos: tuple[int, int], *groups):
-        super().__init__(pos, "pod", 42, Area.TwoByTwo, *groups)
+        super().__init__(pos, "pod", 52, Area.TwoByTwo, *groups)
 
 
 class Tower(Building):
@@ -89,7 +89,7 @@ class Farm(Building):
 
 class Barracks(Building):
     def __init__(self, pos: tuple[int, int], *groups):
-        super().__init__(pos, "barracks", 84, Area.ThreeByThree, *groups)
+        super().__init__(pos, "barracks", 104, Area.ThreeByThree, *groups)
 
 
 class Siegery(Building):

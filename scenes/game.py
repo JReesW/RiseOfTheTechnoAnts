@@ -31,7 +31,7 @@ class Game(Scene):
         self.map = maps.generate_map(terrain)
 
         map_w, map_h = isometric.get_world_size()
-        self.camera = Camera((7040, 0), screen_size=SCREEN_SIZE, x_bounds=(0, map_w - SCREEN_WIDTH), y_bounds=(0, map_h - SCREEN_HEIGHT))
+        self.camera = Camera((7040, 0), screen_size=SCREEN_SIZE, x_bounds=(-540, map_w - SCREEN_WIDTH + 540), y_bounds=(-540, map_h - SCREEN_HEIGHT + 540))
         self.cam_speed = 10
 
         self.buildings: pygame.sprite.Group[buildings.Building] = pygame.sprite.Group()
@@ -58,7 +58,11 @@ class Game(Scene):
         for event in events:
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
-                    pass
+                    for unit in self.units:
+                        if unit.direction == units.Direction.East: unit.direction = units.Direction.South
+                        elif unit.direction == units.Direction.South: unit.direction = units.Direction.West
+                        elif unit.direction == units.Direction.West: unit.direction = units.Direction.North
+                        elif unit.direction == units.Direction.North: unit.direction = units.Direction.East
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:
                     self.select_entity()
