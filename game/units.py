@@ -8,6 +8,7 @@ from game.entities import Entity
 import enum, math
 
 hpi = math.pi / 2
+qpi = lambda n: (math.pi / 4) * n
 
 
 class State(enum.IntEnum):
@@ -32,6 +33,20 @@ class UnitSpriteSheets:
     """
     Preload sprite sheets
     """
+    loaded = False
+    worker = None
+    ...
+
+    @staticmethod
+    def load():
+        UnitSpriteSheets.loaded = True
+        UnitSpriteSheets.worker = spritesheet.SpriteSheet("worker")
+
+    @staticmethod
+    def get(name: str) -> spritesheet.SpriteSheet:
+        if not UnitSpriteSheets.loaded: raise Exception("Unit spritesheets haven't been loaded in yet")
+        if name == "worker": return UnitSpriteSheets.worker
+        raise NameError(f"No unit spritesheet found with the name {name}")
 
 
 
@@ -48,8 +63,9 @@ class Unit(Entity):
         self.state = State.Idle
         self.direction = Direction.East
         self.target = None
+        self.targets = []
 
-        self.sheet = spritesheet.SpriteSheet(sheet_name)
+        self.sheet = UnitSpriteSheets.get("worker")
         self.animation = animation.AnimationHandler(self.sheet)
         self.image = self.sheet.get_sprite("Walk+X0")
 
@@ -58,8 +74,9 @@ class Unit(Entity):
 
         self.shadow = image.load_image(f"antshadow")
 
-    def set_target(self, target: tuple[int, int]):
-        self.target = target
+    def set_targets(self, targets: list[tuple[int, int]]):
+        self.target = None
+        self.targets = targets
 
     def update(self, dt):
         self.update_state(dt)
@@ -73,7 +90,7 @@ class Unit(Entity):
         pass
 
     def draw_shadow(self, surface: pygame.Surface, camera: Camera):
-        r = pygame.Rect(0, 0, *self.shadow.size).move_to(center=isometric.world_to_screen_coords(*self.pos, camera))
+        r = pygame.Rect(0, 0, *self.shadow.size).move_to(center=isometric.tile_to_screen_coords(*self.pos, camera, True))
         surface.blit(self.shadow, r)
 
 
@@ -83,6 +100,9 @@ class Worker(Unit):
 
     def update_state(self, dt):
         self.animation.update(dt)
+
+        if self.target is None and self.targets:
+            self.target, *self.targets = self.targets
 
         if self.target is not None:
             if math.dist(self.pos, self.target) < self.speed:
@@ -95,11 +115,10 @@ class Worker(Unit):
                 theta = math.atan2(ty-py, tx-px)
                 dx, dy = math.cos(theta) * self.speed, math.sin(theta) * self.speed
 
-                # Back to quarter-pi shenanigans
-                if theta < -hpi: self.direction = Direction.West
-                elif theta < 0: self.direction = Direction.North
-                elif theta < hpi: self.direction = Direction.East
-                else: self.direction = Direction.South
+                if qpi(-3) < theta <= qpi(-1): self.direction = Direction.North
+                elif qpi(-1) < theta <= qpi(1): self.direction = Direction.East
+                elif qpi(1) < theta <= qpi(3): self.direction = Direction.South
+                else: self.direction = Direction.West
 
                 self.pos = px + dx, py + dy
                 self.rect = self.rect.move_to(center=isometric.tile_to_world_coords(*self.pos, floating=True))

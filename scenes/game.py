@@ -3,7 +3,7 @@ from engine.scene import Scene, Camera
 from engine import colors, image, debug
 from settings import SCREEN_SIZE, SCREEN_HEIGHT, SCREEN_WIDTH
 
-from game import isometric, maps, entities, buildings, resources, units
+from game import isometric, maps, entities, buildings, resources, units, pathfinding
 
 import random, math
 
@@ -21,6 +21,7 @@ with open("resources/output.txt", 'r') as file:
 class Game(Scene):
     def __init__(self):
         isometric.initialize_isometry(len(terrain), 160, 84)
+        units.UnitSpriteSheets.load()
         
         self.selector_image = image.load_image("selector")
         self.selected1_image = image.load_image("selected1")
@@ -43,7 +44,7 @@ class Game(Scene):
         self.populate_map()
         self.entities.add(
             buildings.Nexus((3, 3), self.buildings),
-            buildings.Nexus((90, 90), self.buildings),
+            buildings.Nexus((26, 58), self.buildings),
             buildings.Pod((3, 8), self.buildings),
             buildings.Farm((3, 13), self.buildings),
             buildings.Barracks((7, 9), self.buildings),
@@ -164,4 +165,10 @@ class Game(Scene):
         """
         if isinstance(self.selected_entity, units.Unit):
             x, y, _ = self.marker
-            self.selected_entity.set_target(isometric.world_coords_to_tile(x, y, True))
+            rounded = round(self.selected_entity.pos[0]), round(self.selected_entity.pos[1])
+            path = pathfinding.pathfind(pathfinding.create_walkable_map(terrain, self.buildings), rounded, isometric.world_coords_to_tile(x, y))
+            if path:
+                path[-1] = isometric.world_coords_to_tile(x, y, True)
+                self.selected_entity.set_targets(path)
+            else:
+                pass  # TODO: PLAY FAIL SOUND EFFECT
