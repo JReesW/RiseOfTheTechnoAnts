@@ -28,9 +28,16 @@ class Direction(enum.StrEnum):
     NorthEast = "+X-Y"
 
 
+class UnitSpriteSheets:
+    """
+    Preload sprite sheets
+    """
+
+
+
 class Unit(Entity):
     """
-    Entities not bound by the grid, their pos is pixel-based
+    Entities not bound by the grid, their pos is pixel-based (floating tile)
     """
 
     def __init__(self, pos: tuple[int, int], sheet_name: str, size: int, speed: int, *groups):
@@ -47,7 +54,7 @@ class Unit(Entity):
         self.image = self.sheet.get_sprite("Walk+X0")
 
         rect = pygame.Rect(0, 0, 48, 48)
-        self.rect = rect.move_to(center=pos)
+        self.rect = rect.move_to(center=isometric.tile_to_world_coords(*pos, floating=True))
 
         self.shadow = image.load_image(f"antshadow")
 
@@ -72,7 +79,7 @@ class Unit(Entity):
 
 class Worker(Unit):
     def __init__(self, pos: tuple[int, int], *groups):
-        super().__init__(pos, "worker", 20, 3, *groups)
+        super().__init__(pos, "worker", 20, 0.03, *groups)
 
     def update_state(self, dt):
         self.animation.update(dt)
@@ -86,15 +93,16 @@ class Worker(Unit):
                 tx, ty = self.target
                 px, py = self.pos
                 theta = math.atan2(ty-py, tx-px)
-                dx, dy = round(math.cos(theta) * self.speed), round(math.sin(theta) * self.speed * (42/80))
+                dx, dy = math.cos(theta) * self.speed, math.sin(theta) * self.speed
 
+                # Back to quarter-pi shenanigans
                 if theta < -hpi: self.direction = Direction.West
                 elif theta < 0: self.direction = Direction.North
                 elif theta < hpi: self.direction = Direction.East
                 else: self.direction = Direction.South
 
                 self.pos = px + dx, py + dy
-                self.rect = self.rect.move_to(center=self.pos)
+                self.rect = self.rect.move_to(center=isometric.tile_to_world_coords(*self.pos, floating=True))
 
     def update_animation(self, dt):
         if self.state == State.Idle: self.animation.play(f"Idle{self.direction}")

@@ -42,7 +42,7 @@ def tile_size() -> tuple[int, int]:
     return __settings["tile_width"], __settings["tile_height"]
     
 
-def tile_to_world_coords(x: int, y: int, world_size: tuple[int, int] = None) -> tuple[int, int]:
+def tile_to_world_coords(x: int, y: int, world_size: tuple[int, int] = None, floating: bool = False) -> tuple[int, int]:
     """
     Return the center of a tile in world coordinates
     """
@@ -51,15 +51,15 @@ def tile_to_world_coords(x: int, y: int, world_size: tuple[int, int] = None) -> 
 
     w, _ = get_world_size() if world_size is None else world_size
     px = (w // 2) + (x - y) * 80
-    py = 42 + (x + y) * 42
+    py = (0 if floating else 42) + (x + y) * 42
     return px, py
 
 
-def tile_to_screen_coords(x: int, y: int, camera: Camera) -> tuple[int, int]:
+def tile_to_screen_coords(x: int, y: int, camera: Camera, floating: bool = False) -> tuple[int, int]:
     """
     Return the center of a tile in screen coordinates
     """
-    px, py = tile_to_world_coords(x, y)
+    px, py = tile_to_world_coords(x, y, floating=floating)
     return px - camera.rect.left, py - camera.rect.top
 
 
@@ -87,7 +87,7 @@ def get_world_size() -> tuple[int, int]:
     return __settings["dimension"] * __settings["tile_width"], __settings["dimension"] * __settings["tile_height"]
 
 
-def screen_coords_to_tile(x: int, y: int, camera: Camera) -> tuple[int, int]:
+def screen_coords_to_tile(x: int, y: int, camera: Camera, floating: bool = False) -> tuple[int, int]:
     """
     Return the tile corresponding to the given screen coords
     """
@@ -100,4 +100,19 @@ def screen_coords_to_tile(x: int, y: int, camera: Camera) -> tuple[int, int]:
     tx = (x / 80 + y / 42) / 2
     ty = (y / 42 - x / 80) / 2
 
+    if floating: return tx, ty
+    return floor(tx), floor(ty)
+
+
+def world_coords_to_tile(x: int, y: int, floating: bool = False):
+    """
+    Return the tile corresponding to the given world coords
+    """
+    x -= get_world_size()[0] / 2
+    y -= 0
+
+    tx = (x / 80 + y / 42) / 2
+    ty = (y / 42 - x / 80) / 2
+
+    if floating: return tx, ty
     return floor(tx), floor(ty)

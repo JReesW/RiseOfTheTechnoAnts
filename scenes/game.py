@@ -50,24 +50,16 @@ class Game(Scene):
             buildings.Siegery((7, 13), self.buildings),
             buildings.Farm((10, 37), self.buildings),
             buildings.Nexus((20, 35), self.buildings),
-            units.Worker(isometric.tile_to_world_coords(6, 3), self.units),
-            units.Worker(isometric.tile_to_world_coords(6, 4), self.units),
-            units.Worker(isometric.tile_to_world_coords(6, 5), self.units)
+            units.Worker((6, 3), self.units)
         )
         self.selected_entity = None
     
     def handle_events(self, events):
         mouse = pygame.mouse.get_pos()
+        pressed = pygame.key.get_pressed()
 
         for event in events:
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_SPACE:
-                    for unit in self.units:
-                        if unit.direction == units.Direction.East: unit.direction = units.Direction.South
-                        elif unit.direction == units.Direction.South: unit.direction = units.Direction.West
-                        elif unit.direction == units.Direction.West: unit.direction = units.Direction.North
-                        elif unit.direction == units.Direction.North: unit.direction = units.Direction.East
-            elif event.type == pygame.MOUSEBUTTONUP:
+            if event.type == pygame.MOUSEBUTTONUP:
                 if event.button == 1:
                     self.select_entity(mouse)
             elif event.type == pygame.MOUSEBUTTONDOWN:
@@ -94,6 +86,11 @@ class Game(Scene):
             x, y, t = self.marker
             self.marker = (x, y, t-1) if t > 0 else None
 
+        for unit in self.units:
+            debug.debug("ant pos", (unit.pos))
+            debug.debug("ant spos", isometric.tile_to_screen_coords(*unit.pos, self.camera))
+        debug.debug("selected", self.selected_entity.__class__.__name__)
+
     def render(self, surface):
         surface.fill(colors.black)
 
@@ -110,8 +107,8 @@ class Game(Scene):
                 surface.blit(img, r)
             case units.Unit():
                 img = image.load_image("selected_unit")
-                px, py = self.selected_entity.pos
-                r = img.get_rect().move_to(center=isometric.world_to_screen_coords(px, py + 10, self.camera))
+                px, py = isometric.tile_to_screen_coords(*self.selected_entity.pos, self.camera, True)
+                r = img.get_rect().move_to(center=(px, py+10))
                 surface.blit(img, r)
 
         # Only draw the selector when in bounds 
@@ -139,7 +136,7 @@ class Game(Scene):
         try:
             if 0 <= self.selector[0] < 100 and 0 <= self.selector[1] < 100:
                 for unit in self.units:
-                    screen_pos = isometric.world_to_screen_coords(*unit.pos, self.camera)
+                    screen_pos = isometric.tile_to_screen_coords(*unit.pos, self.camera, True)
                     if math.dist(screen_pos, mouse) < unit.size:
                         self.selected_entity = unit
                         raise EntitySelected
@@ -167,4 +164,4 @@ class Game(Scene):
         """
         if isinstance(self.selected_entity, units.Unit):
             x, y, _ = self.marker
-            self.selected_entity.set_target((x, y))
+            self.selected_entity.set_target(isometric.world_coords_to_tile(x, y, True))
