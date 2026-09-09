@@ -64,7 +64,7 @@ def pathfind(walkmap: Tilemap, start: Coords, goal: Coords) -> list[Coords]:
                 break
             for dx, dy in dirs:
                 new_tile = nx, ny = x + dx, y + dy
-                if 0 <= nx < w and 0 <= ny < h and walkmap[ny][nx] and count_map[ny][nx] is None:
+                if 0 <= nx < w and 0 <= ny < h and walkmap[ny][nx] and (count_map[ny][nx] is None or count_map[ny][nx] >= count_map[y][x]):
                     prio.put((math.dist(new_tile, goal), new_tile))
                     count_map[ny][nx] = count_map[y][x] + 1
     except queue.Empty:

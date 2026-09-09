@@ -102,6 +102,8 @@ class Game(Scene):
 
         self.selector_prev = self.selector
         self.selector = isometric.screen_to_tile_coords(*mouse, self.camera)
+        if self.selector[0] < 0 or self.selector[0] >= len(terrain[0]) or self.selector[1] < 0 or self.selector[1] >= len(terrain):
+            self.selector = None
         debug.debug("selector", self.selector)
                 
     def update(self, dt):
@@ -140,11 +142,11 @@ class Game(Scene):
                     surface.blit(img, r)
 
             # Only draw the selector when in bounds 
-            if 0 <= self.selector[0] < 100 and 0 <= self.selector[1] < 100:
+            if self.selector is not None and 0 <= self.selector[0] < 100 and 0 <= self.selector[1] < 100:
                 px, py = isometric.tile_to_screen_coords(*self.selector, self.camera)
                 r = pygame.Rect(0, 0, 160, 84).move_to(center=(px, py))
                 surface.blit(self.selector_image, r)
-        elif self.cursor_state == CursorState.Build:
+        elif self.cursor_state == CursorState.Build and self.selector is not None:
             ghost = self.ghost_building
 
             for tile in self.invalid_tiles:
@@ -176,7 +178,7 @@ class Game(Scene):
         Detect whether a building or unit is selected by a mouse click
         """
         try:
-            if 0 <= self.selector[0] < 100 and 0 <= self.selector[1] < 100:
+            if self.selector is not None and 0 <= self.selector[0] < 100 and 0 <= self.selector[1] < 100:
                 for unit in self.units:
                     screen_pos = isometric.tile_to_screen_coords(*unit.pos, self.camera, True)
                     if math.dist(screen_pos, mouse) < unit.size:

@@ -23,8 +23,9 @@ def blocked_tiles(walkmap: Tilemap, pos: Coords, building_type: type[Building]) 
     if building_type.area == Area.ThreeByThree: x1, y2 = -1, 1
     for y in range(y1, y2+1):
         for x in range(x1, x2+1):
-            if walkmap[by + y][bx + x] == 0:
-                blocked.append((bx + x, by + y))
+            nx, ny = bx + x, by + y
+            if nx < 0 or nx >= len(walkmap[0]) or ny < 0 or ny >= len(walkmap) or walkmap[ny][nx] == 0:
+                blocked.append((nx, ny))
     return blocked
 
 
