@@ -4,6 +4,7 @@ from engine import image
 from engine.scene import Camera
 from game import isometric
 from game.entities import Entity
+from game.types import *
 
 import enum
 
@@ -14,24 +15,49 @@ class Area(enum.IntEnum):
     ThreeByThree = 3
 
 
+def blocked_tiles(walkmap: Tilemap, pos: Coords, building_type: type[Building]) -> list[Coords]:
+    blocked = []
+    bx, by = pos
+    x1, x2, y1, y2 = 0, 0, 0, 0
+    if building_type.area >= Area.TwoByTwo: x2, y1 = 1, -1
+    if building_type.area == Area.ThreeByThree: x1, y2 = -1, 1
+    for y in range(y1, y2+1):
+        for x in range(x1, x2+1):
+            if walkmap[by + y][bx + x] == 0:
+                blocked.append((bx + x, by + y))
+    return blocked
+
+
 class Building(Entity):
     """
     Entities bound by the grid, their pos is tile-based
-    """
 
-    def __init__(self, pos: tuple[int, int], image_name: str, bottom_offset: int, area: Area, *groups):
-        super().__init__(bottom_offset, *groups)
+     - `pos`: its tile coordinates
+     - `image_name`: the basis for all image names of this building
+     - `bottom_offset`: how far the rect's bottom has to be offset from the position
+     - `area`: the dimensions of how many tiles it takes in place
+    """
+    name: str
+    bottom_offset: int
+    area: Area
+
+    blacklist: list[int] = [0, 2, 5, 6]
+
+    def __init__(self, pos: Coords, *groups):
+        building_type = type(self)
+        super().__init__(building_type.bottom_offset, *groups)
+
         self.pos = pos
-        self.image = image.load_image(image_name)
-        self.area = area
+        self.image = image.load_image(building_type.name)
+        self.area = building_type.area
         rect = pygame.Rect(0, 0, *self.image.size)
         px, py = isometric.tile_to_world_coords(*self.pos)
-        ox = 80 if area == Area.TwoByTwo else 0  # offset the X from tile center on TwoByTwo
+        ox = 80 if building_type.area == Area.TwoByTwo else 0  # offset the X from tile center on TwoByTwo
         self.rect = rect.move_to(centerx = px + ox, bottom = py + self.bottom_offset)
 
-        self.shadow = image.load_image(f"shadow{area}")
+        self.shadow = image.load_image(f"shadow{building_type.area}")
 
-    def occupies_tile(self, tile: tuple[int, int]) -> bool:
+    def occupies_tile(self, tile: Coords) -> bool:
         """
         Return whether this building occupies the given tile
         """
@@ -58,40 +84,50 @@ class Building(Entity):
 
 
 class Nexus(Building):
-    def __init__(self, pos: tuple[int, int], *groups):
-        super().__init__(pos, "nexus", 74, Area.ThreeByThree, *groups)
+    name = "nexus"
+    bottom_offset = 74
+    area = Area.ThreeByThree
+    sound = "nexus"
 
 
 class Pod(Building):
-    def __init__(self, pos: tuple[int, int], *groups):
-        super().__init__(pos, "pod", 52, Area.TwoByTwo, *groups)
+    name = "pod"
+    bottom_offset = 52
+    area = Area.TwoByTwo
+    sound = "pod"
 
 
 class Tower(Building):
-    def __init__(self, pos: tuple[int, int], *groups):
-        super().__init__(pos, "nexus1", 25, Area.OneByOne, *groups)
+    name = "nexus1"
+    bottom_offset = 25
+    area = Area.OneByOne
 
 
 class Farm(Building):
-    def __init__(self, pos: tuple[int, int], *groups):
-        super().__init__(pos, "fungusfarm", 84, Area.ThreeByThree, *groups)
+    name = "fungusfarm"
+    bottom_offset = 84
+    area = Area.ThreeByThree
 
 
 # class Lumbermill(Building):
-#     def __init__(self, pos: tuple[int, int], *groups):
-#         super().__init__(bottom_offset, *groups)
+#     name = ...
+#     bottom_offset = ...
+#     area = ...
 
 
 # class Forgery(Building):
-#     def __init__(self, pos: tuple[int, int], *groups):
-#         super().__init__(bottom_offset, *groups)
+#     name = ...
+#     bottom_offset = ...
+#     area = ...
 
 
 class Barracks(Building):
-    def __init__(self, pos: tuple[int, int], *groups):
-        super().__init__(pos, "barracks", 104, Area.ThreeByThree, *groups)
+    name = "barracks"
+    bottom_offset = 104
+    area = Area.ThreeByThree
 
 
 class Siegery(Building):
-    def __init__(self, pos: tuple[int, int], *groups):
-        super().__init__(pos, "siegery", 84, Area.ThreeByThree, *groups)
+    name = "siegery"
+    bottom_offset = 84
+    area = Area.ThreeByThree

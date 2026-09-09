@@ -1,6 +1,8 @@
 import pygame
 
 from game.buildings import Building, Area
+from game.types import *
+
 import queue, math
 
 
@@ -16,17 +18,17 @@ dirs = [
 ]
 
 
-def create_walkable_map(terrain: list[list[int]], buildings: pygame.sprite.Group[Building]) -> list[list[int]]:
+def create_walkable_map(terrain: Tilemap, buildings: pygame.sprite.Group[Building], blacklist: list[int]) -> Tilemap:
     """
     Create a tilemap indicating which tile is walkable (1) and which isn't (0)
     """
-    walkmap: list[list[int]] = []
+    walkmap: Tilemap = []
 
     # Mark all walkable tiles
     for y, row in enumerate(terrain):
         walkmap.append([])
         for cell in row:
-            walkmap[y].append(0 if cell == 0 else 1)
+            walkmap[y].append(0 if cell in blacklist else 1)
 
     # Mark tiles occupied by buildings as non-walkable
     for building in buildings:
@@ -41,7 +43,7 @@ def create_walkable_map(terrain: list[list[int]], buildings: pygame.sprite.Group
     return walkmap
 
 
-def pathfind(walkmap: list[list[int]], start: tuple[int, int], goal: tuple[int, int]) -> list[tuple[int, int]]:
+def pathfind(walkmap: Tilemap, start: Coords, goal: Coords) -> list[Coords]:
     """
     Returns the fastest route from the start to the goal in the given walking map
     """
@@ -77,11 +79,11 @@ def pathfind(walkmap: list[list[int]], start: tuple[int, int], goal: tuple[int, 
         n = count_map[y][x]
         if n == 0: break
         path.append(pos)
-        options = [(dx, dy) for dx, dy in dirs if 0 <= y+dy < h and 0 <= x+dx < w and count_map[y+dy][x+dx] == n-1]
+        options = [(dx, dy) for dx, dy in dirs if n is not None and 0 <= y+dy < h and 0 <= x+dx < w and count_map[y+dy][x+dx] == n-1]
 
         if prev in options: pass
         elif len(options) == 1 or prev is None: prev = options[0]
 
         pos = prev[0] + pos[0], prev[1] + pos[1]
 
-    return list(reversed(path))
+    return list(reversed([(x+0.5, y+0.5) for x, y in path]))

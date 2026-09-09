@@ -8,6 +8,8 @@ Handy info about the different coordinate spaces:
 """
 
 from engine.scene import Camera
+from game.types import *
+
 from math import floor
 
 
@@ -40,9 +42,19 @@ def tile_size() -> tuple[int, int]:
             raise Exception("Please initialize the isometry settings before using")
 
     return __settings["tile_width"], __settings["tile_height"]
+
+
+def get_world_size() -> tuple[int, int]:
+    """
+    Return the world size
+    """
+    if not __settings["initialized"]:
+        raise Exception("Please initialize the isometry settings before using")
+
+    return __settings["dimension"] * __settings["tile_width"], __settings["dimension"] * __settings["tile_height"]
     
 
-def tile_to_world_coords(x: int, y: int, world_size: tuple[int, int] = None, floating: bool = False) -> tuple[int, int]:
+def tile_to_world_coords(x: int, y: int, world_size: tuple[int, int] = None, floating: bool = False) -> Coords:
     """
     Return the center of a tile in world coordinates
     """
@@ -55,7 +67,7 @@ def tile_to_world_coords(x: int, y: int, world_size: tuple[int, int] = None, flo
     return px, py
 
 
-def tile_to_screen_coords(x: int, y: int, camera: Camera, floating: bool = False) -> tuple[int, int]:
+def tile_to_screen_coords(x: int, y: int, camera: Camera, floating: bool = False) -> Coords:
     """
     Return the center of a tile in screen coordinates
     """
@@ -63,31 +75,21 @@ def tile_to_screen_coords(x: int, y: int, camera: Camera, floating: bool = False
     return px - camera.rect.left, py - camera.rect.top
 
 
-def world_to_screen_coords(x: int, y: int, camera: Camera) -> tuple[int, int]:
+def world_to_screen_coords(x: int, y: int, camera: Camera) -> Coords:
     """
     Convert world coords to screen coords
     """
     return x - camera.rect.left, y - camera.rect.top
 
 
-def screen_to_world_coords(x: int, y: int, camera: Camera) -> tuple[int, int]:
+def screen_to_world_coords(x: int, y: int, camera: Camera) -> Coords:
     """
     Convert world coords to screen coords
     """
     return x + camera.rect.left, y + camera.rect.top
 
 
-def get_world_size() -> tuple[int, int]:
-    """
-    Return the world size
-    """
-    if not __settings["initialized"]:
-        raise Exception("Please initialize the isometry settings before using")
-
-    return __settings["dimension"] * __settings["tile_width"], __settings["dimension"] * __settings["tile_height"]
-
-
-def screen_coords_to_tile(x: int, y: int, camera: Camera, floating: bool = False) -> tuple[int, int]:
+def screen_to_tile_coords(x: int, y: int, camera: Camera, floating: bool = False) -> Coords:
     """
     Return the tile corresponding to the given screen coords
     """
@@ -104,7 +106,7 @@ def screen_coords_to_tile(x: int, y: int, camera: Camera, floating: bool = False
     return floor(tx), floor(ty)
 
 
-def world_coords_to_tile(x: int, y: int, floating: bool = False):
+def world_to_tile_coords(x: int, y: int, floating: bool = False):
     """
     Return the tile corresponding to the given world coords
     """

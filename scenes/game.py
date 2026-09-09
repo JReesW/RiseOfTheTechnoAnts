@@ -1,15 +1,21 @@
 import pygame
 from engine.scene import Scene, Camera
-from engine import colors, image, debug
+from engine import colors, image, debug, audio
 from settings import SCREEN_SIZE, SCREEN_HEIGHT, SCREEN_WIDTH
 
 from game import isometric, maps, entities, buildings, resources, units, pathfinding
+from game.types import *
 
-import random, math
+import random, math, enum
 
 
 class EntitySelected(Exception):
     """"""
+
+
+class CursorState(enum.Enum):
+    Select = 0
+    Build = 1
 
 
 terrain = []
@@ -22,14 +28,23 @@ class Game(Scene):
     def __init__(self):
         isometric.initialize_isometry(len(terrain), 160, 84)
         units.UnitSpriteSheets.load()
+
+        self.audio = audio.AudioHandler()
+        self.audio.set_sfx_volume(0.7)
         
         self.selector_image = image.load_image("selector")
         self.selected1_image = image.load_image("selected1")
         self.selected2_image = image.load_image("selected2")
         self.selected3_image = image.load_image("selected3")
+        self.invalid_image = image.load_image("invalid")
         self.marker_image = image.load_image("marker")
         self.selector = (0, 0)
+        self.selector_prev = (0, 0)
         self.marker = None
+        self.cursor_state = CursorState.Select
+
+        self.ghost_building = None
+        self.invalid_tiles = []
 
         self.map = maps.generate_map(terrain)
 
@@ -60,9 +75,17 @@ class Game(Scene):
         pressed = pygame.key.get_pressed()
 
         for event in events:
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_1:
+                    self.initiate_construction(buildings.Nexus)
+                if event.key == pygame.K_2:
+                    self.initiate_construction(buildings.Pod)
             if event.type == pygame.MOUSEBUTTONUP:
                 if event.button == 1:
-                    self.select_entity(mouse)
+                    if self.cursor_state == CursorState.Select:
+                        self.select_entity(mouse)
+                    elif self.cursor_state == CursorState.Build:
+                        self.finish_construction()
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 3:
                     self.marker = (*isometric.screen_to_world_coords(*mouse, self.camera), 120)
@@ -77,7 +100,8 @@ class Game(Scene):
         elif mouse[0] < 20:
             self.camera.move(-self.cam_speed, 0)
 
-        self.selector = isometric.screen_coords_to_tile(*mouse, self.camera)
+        self.selector_prev = self.selector
+        self.selector = isometric.screen_to_tile_coords(*mouse, self.camera)
         debug.debug("selector", self.selector)
                 
     def update(self, dt):
@@ -87,9 +111,11 @@ class Game(Scene):
             x, y, t = self.marker
             self.marker = (x, y, t-1) if t > 0 else None
 
-        for unit in self.units:
-            debug.debug("ant pos", (unit.pos))
-            debug.debug("ant spos", isometric.tile_to_screen_coords(*unit.pos, self.camera))
+        if self.cursor_state == CursorState.Build:
+            if self.selector != self.selector_prev and self.selector != None:
+                walkmap = pathfinding.create_walkable_map(terrain, self.buildings, buildings.Building.blacklist)
+                self.invalid_tiles = buildings.blocked_tiles(walkmap, self.selector, self.ghost_building)
+
         debug.debug("selected", self.selected_entity.__class__.__name__)
 
     def render(self, surface):
@@ -100,23 +126,38 @@ class Game(Scene):
             if rect.colliderect(self.camera.rect):
                 surface.blit(surf, (rect.left - self.camera.rect.left, rect.top - self.camera.rect.top))
 
-        # Draw the green indicator showing which entity is selected
-        match self.selected_entity:
-            case buildings.Building():
-                img = {1: self.selected1_image, 2: self.selected2_image, 3: self.selected3_image}[self.selected_entity.area]
-                r = img.get_rect().move_to(center=isometric.world_to_screen_coords(*self.selected_entity.get_center(), self.camera))
-                surface.blit(img, r)
-            case units.Unit():
-                img = image.load_image("selected_unit")
-                px, py = isometric.tile_to_screen_coords(*self.selected_entity.pos, self.camera, True)
-                r = img.get_rect().move_to(center=(px, py+10))
-                surface.blit(img, r)
+        if self.cursor_state == CursorState.Select:
+            # Draw the green indicator showing which entity is selected
+            match self.selected_entity:
+                case buildings.Building():
+                    img = {1: self.selected1_image, 2: self.selected2_image, 3: self.selected3_image}[self.selected_entity.area]
+                    r = img.get_rect().move_to(center=isometric.world_to_screen_coords(*self.selected_entity.get_center(), self.camera))
+                    surface.blit(img, r)
+                case units.Unit():
+                    img = image.load_image("selected_unit")
+                    px, py = isometric.tile_to_screen_coords(*self.selected_entity.pos, self.camera, True)
+                    r = img.get_rect().move_to(center=(px, py+10))
+                    surface.blit(img, r)
 
-        # Only draw the selector when in bounds 
-        if 0 <= self.selector[0] < 100 and 0 <= self.selector[1] < 100:
+            # Only draw the selector when in bounds 
+            if 0 <= self.selector[0] < 100 and 0 <= self.selector[1] < 100:
+                px, py = isometric.tile_to_screen_coords(*self.selector, self.camera)
+                r = pygame.Rect(0, 0, 160, 84).move_to(center=(px, py))
+                surface.blit(self.selector_image, r)
+        elif self.cursor_state == CursorState.Build:
+            ghost = self.ghost_building
+
+            for tile in self.invalid_tiles:
+                r = pygame.Rect(0, 0, 160, 84).move_to(center=isometric.tile_to_screen_coords(*tile, self.camera))
+                surface.blit(self.invalid_image, r)
+
+            invalid = '' if len(self.invalid_tiles) == 0 else '_invalid'
+            img = image.load_image(f"{ghost.name}_ghost{invalid}")
+            r = pygame.Rect(0, 0, *img.size)
             px, py = isometric.tile_to_screen_coords(*self.selector, self.camera)
-            r = pygame.Rect(0, 0, 160, 84).move_to(center=(px, py))
-            surface.blit(self.selector_image, r)
+            ox = 80 if ghost.area == buildings.Area.TwoByTwo else 0
+            r = r.move_to(centerx = px + ox, bottom = py + ghost.bottom_offset)
+            surface.blit(img, r)
 
         # Draw all entities and their shadows
         self.entities.draw_shadows(surface)
@@ -130,7 +171,7 @@ class Game(Scene):
             self.marker_image.set_alpha(255 if t > 20 else pygame.math.remap(20, 0, 255, 0, t))
             surface.blit(self.marker_image, r)
 
-    def select_entity(self, mouse: tuple[int, int]):
+    def select_entity(self, mouse: Coords):
         """
         Detect whether a building or unit is selected by a mouse click
         """
@@ -146,7 +187,8 @@ class Game(Scene):
                         self.selected_entity = building
                         raise EntitySelected
         except EntitySelected:
-            pass
+            if self.selected_entity is not None and self.selected_entity.sound is not None:
+                self.audio.play_sound(self.selected_entity.sound)
         else:
             self.selected_entity = None
 
@@ -166,9 +208,28 @@ class Game(Scene):
         if isinstance(self.selected_entity, units.Unit):
             x, y, _ = self.marker
             rounded = round(self.selected_entity.pos[0]), round(self.selected_entity.pos[1])
-            path = pathfinding.pathfind(pathfinding.create_walkable_map(terrain, self.buildings), rounded, isometric.world_coords_to_tile(x, y))
+            path = pathfinding.pathfind(pathfinding.create_walkable_map(terrain, self.buildings, self.selected_entity.blacklist), rounded, isometric.world_to_tile_coords(x, y))
             if path:
-                path[-1] = isometric.world_coords_to_tile(x, y, True)
+                path[-1] = isometric.world_to_tile_coords(x, y, True)
                 self.selected_entity.set_targets(path)
             else:
                 pass  # TODO: PLAY FAIL SOUND EFFECT
+
+    def initiate_construction(self, building: type[buildings.Building]):
+        """
+        Setup the building's ghost for construction
+        """
+        self.cursor_state = CursorState.Build
+        self.ghost_building = building
+        self.selected_entity = None
+
+    def finish_construction(self):
+        """
+        Place the ghost building
+        """
+        if len(self.invalid_tiles) == 0:
+            # check material costs and deduct them
+            self.cursor_state = CursorState.Select
+            building = self.ghost_building(self.selector, self.buildings)
+            self.entities.add(building)
+            self.selected_entity = building

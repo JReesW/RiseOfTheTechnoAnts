@@ -3,6 +3,7 @@ import pygame
 from engine import image
 from game.entities import Entity
 from game import isometric
+from game.types import *
 
 import random
 
@@ -18,7 +19,7 @@ tree_offsets = [
 
 
 class Resource(Entity):
-    def __init__(self, pos: tuple[int, int], bottom_offset, *groups):
+    def __init__(self, pos: Coords, bottom_offset, *groups):
         super().__init__(bottom_offset, *groups)
         self.pos = pos
         self.center = isometric.tile_to_world_coords(*pos)
@@ -30,7 +31,7 @@ class Resource(Entity):
 
 
 class Tree(Resource):
-    def __init__(self, pos: tuple[int, int], *groups):
+    def __init__(self, pos: Coords, *groups):
         super().__init__(pos, 0, *groups)
         self.center = isometric.tile_to_world_coords(*pos)
 

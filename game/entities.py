@@ -33,6 +33,8 @@ class Entities(pygame.sprite.LayeredUpdates):
 
 
 class Entity(pygame.sprite.Sprite):
+    sound: str = None
+
     def __init__(self, bottom_offset: int, *groups):
         super().__init__(*groups)
         self.bottom_offset = bottom_offset

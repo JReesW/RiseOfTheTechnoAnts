@@ -5,6 +5,7 @@ import pygame
 
 from engine import image
 from game import isometric
+from game.types import *
 
 import random
 
@@ -39,7 +40,7 @@ def select_image(cell: int) -> pygame.Surface:
     return ground_tiles[random.randint(0, 3)]
 
 
-def generate_chunk(terrain: list[list[int]], cx: int, cy: int) -> tuple[pygame.Rect, pygame.Surface]:
+def generate_chunk(terrain: Tilemap, cx: int, cy: int) -> tuple[pygame.Rect, pygame.Surface]:
     w, h = isometric.tile_size()
     surface = pygame.Surface((w * 10, h * 10), pygame.SRCALPHA)
     world_size = (w * 10, h * 10)
@@ -57,7 +58,7 @@ def generate_chunk(terrain: list[list[int]], cx: int, cy: int) -> tuple[pygame.R
     return rect, surface
 
 
-def generate_map(terrain: list[list[int]]) -> list[tuple[pygame.Rect, pygame.Surface]]:
+def generate_map(terrain: Tilemap) -> list[tuple[pygame.Rect, pygame.Surface]]:
     if ground is None: load_images()
 
     n = len(terrain)

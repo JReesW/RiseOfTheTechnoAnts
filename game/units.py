@@ -4,6 +4,7 @@ from engine import image, spritesheet, animation, debug
 from engine.scene import Camera
 from game import isometric
 from game.entities import Entity
+from game.types import *
 
 import enum, math
 
@@ -53,19 +54,30 @@ class UnitSpriteSheets:
 class Unit(Entity):
     """
     Entities not bound by the grid, their pos is pixel-based (floating tile)
-    """
 
-    def __init__(self, pos: tuple[int, int], sheet_name: str, size: int, speed: int, *groups):
+     - `pos`: their floating tile coordinates
+     - `sheet_name`: the name of their spritesheet
+     - `size`: their radial size in pixels
+     - `speed`: their movement speed (floatingtile/tick)
+     - `blacklist`: list of terrain values they can't move through
+    """
+    name: str
+    size: int
+    speed: int
+    blacklist: list[int]
+
+    def __init__(self, pos: Coords, *groups):
+        unit_type = type(self)
         super().__init__(0, *groups)
         self.pos = pos
-        self.size = size  # radial size
-        self.speed = speed
+        self.size = unit_type.size
+        self.speed = unit_type.speed
         self.state = State.Idle
         self.direction = Direction.East
         self.target = None
         self.targets = []
 
-        self.sheet = UnitSpriteSheets.get("worker")
+        self.sheet = UnitSpriteSheets.get(unit_type.name)
         self.animation = animation.AnimationHandler(self.sheet)
         self.image = self.sheet.get_sprite("Walk+X0")
 
@@ -74,7 +86,7 @@ class Unit(Entity):
 
         self.shadow = image.load_image(f"antshadow")
 
-    def set_targets(self, targets: list[tuple[int, int]]):
+    def set_targets(self, targets: list[Coords]):
         self.target = None
         self.targets = targets
 
@@ -95,9 +107,11 @@ class Unit(Entity):
 
 
 class Worker(Unit):
-    def __init__(self, pos: tuple[int, int], *groups):
-        super().__init__(pos, "worker", 20, 0.03, *groups)
-
+    name = "worker"
+    size = 20
+    speed = 0.03
+    blacklist = [0]
+    
     def update_state(self, dt):
         self.animation.update(dt)
 
