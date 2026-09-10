@@ -1,6 +1,6 @@
 import pygame
 
-from engine import image
+from engine import image, spritesheet, animation
 from engine.scene import Camera
 from game import isometric
 from game.entities import Entity
@@ -49,7 +49,7 @@ class Building(Entity):
         super().__init__(allegiance, building_type.bottom_offset, *groups)
 
         self.pos = pos
-        self.image = image.load_image(f"buildings/{building_type.name}")
+        self.image = image.load_image(f"buildings/{building_type.name}{'' if allegiance == Allegiance.Player else '_red'}")
         self.area = building_type.area
         rect = pygame.Rect(0, 0, *self.image.size)
         px, py = isometric.tile_to_world_coords(*self.pos)
@@ -99,9 +99,23 @@ class Pod(Building):
 
 
 class Tower(Building):
-    name = "nexus1"
-    bottom_offset = 25
-    area = Area.OneByOne
+    name = "tower"
+    bottom_offset = 50
+    area = Area.TwoByTwo
+
+    def __init__(self, pos, allegiance, *groups):
+        super().__init__(pos, allegiance, *groups)
+
+        tower_color = "tower" if allegiance == Allegiance.Player else "tower_red"
+        sheet = spritesheet.load_spritesheet("tower")
+        self.animation = animation.AnimationHandler(sheet)
+        self.animation.play(tower_color)
+        self.image = sheet.get_sprite(f"{tower_color}1")
+
+    def update(self, dt):
+        self.animation.update(dt)
+        self.image = self.animation.get_frame()
+        return super().update(dt)
 
 
 class Farm(Building):
@@ -110,16 +124,26 @@ class Farm(Building):
     area = Area.ThreeByThree
 
 
-# class Lumbermill(Building):
-#     name = ...
-#     bottom_offset = ...
-#     area = ...
+class Lumbermill(Building):
+    name = "lumbermill"
+    bottom_offset = 94
+    area = Area.ThreeByThree
+
+    def draw_shadow(self, surface: pygame.Surface, camera: Camera):
+        cx, cy = isometric.world_to_screen_coords(*self.get_center(), camera)
+        r = pygame.Rect(0, 0, *self.shadow.size).move_to(center=(cx + 40, cy))
+        surface.blit(self.shadow, r)
 
 
-# class Forgery(Building):
-#     name = ...
-#     bottom_offset = ...
-#     area = ...
+class Foundry(Building):
+    name = "foundry"
+    bottom_offset = 104
+    area = Area.ThreeByThree
+
+    def draw_shadow(self, surface: pygame.Surface, camera: Camera):
+        cx, cy = isometric.world_to_screen_coords(*self.get_center(), camera)
+        r = pygame.Rect(0, 0, *self.shadow.size).move_to(center=(cx + 40, cy + 10))
+        surface.blit(self.shadow, r)
 
 
 class Barracks(Building):

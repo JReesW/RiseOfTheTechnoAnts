@@ -27,7 +27,6 @@ with open("resources/output.txt", 'r') as file:
 class Game(Scene):
     def __init__(self):
         isometric.initialize_isometry(len(terrain), 160, 84)
-        units.UnitSpriteSheets.load()
 
         self.audio = audio.AudioHandler()
         self.audio.set_sfx_volume(0.7)
@@ -58,14 +57,22 @@ class Game(Scene):
         self.entities = entities.Entities(self.camera)
         self.populate_map()
         self.entities.add(
-            buildings.Nexus((3, 3), Allegiance.Player, self.buildings),
-            buildings.Nexus((26, 58), Allegiance.Player, self.buildings),
-            buildings.Pod((3, 8), Allegiance.Player, self.buildings),
-            buildings.Farm((3, 13), Allegiance.Player, self.buildings),
-            buildings.Barracks((7, 9), Allegiance.Player, self.buildings),
-            buildings.Siegery((7, 13), Allegiance.Player, self.buildings),
-            buildings.Farm((10, 37), Allegiance.Player, self.buildings),
-            buildings.Nexus((20, 35), Allegiance.Player, self.buildings),
+            buildings.Nexus((6, 3), Allegiance.Player, self.buildings),
+            buildings.Pod((10, 3), Allegiance.Player, self.buildings),
+            buildings.Farm((14, 3), Allegiance.Player, self.buildings),
+            buildings.Barracks((18, 3), Allegiance.Player, self.buildings),
+            buildings.Siegery((22, 3), Allegiance.Player, self.buildings),
+            buildings.Lumbermill((26, 3), Allegiance.Player, self.buildings),
+            buildings.Foundry((30, 3), Allegiance.Player, self.buildings),
+            buildings.Tower((7, 7), Allegiance.Player, self.buildings),
+            buildings.Nexus((3, 6), Allegiance.Enemy, self.buildings),
+            buildings.Pod((3, 10), Allegiance.Enemy, self.buildings),
+            buildings.Farm((3, 14), Allegiance.Enemy, self.buildings),
+            buildings.Barracks((3, 18), Allegiance.Enemy, self.buildings),
+            buildings.Siegery((3, 22), Allegiance.Enemy, self.buildings),
+            buildings.Lumbermill((3, 26), Allegiance.Enemy, self.buildings),
+            buildings.Foundry((3, 30), Allegiance.Enemy, self.buildings),
+            buildings.Tower((7, 10), Allegiance.Enemy, self.buildings),
             units.Worker((6, 3), Allegiance.Player, self.units)
         )
         self.selected_entity = None
@@ -80,10 +87,25 @@ class Game(Scene):
 
         for event in events:
             if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE and self.cursor_state == CursorState.Build:
+                    self.cursor_state = CursorState.Select
+                    self.ghost_building = None
                 if event.key == pygame.K_1:
                     self.initiate_construction(buildings.Nexus)
                 if event.key == pygame.K_2:
                     self.initiate_construction(buildings.Pod)
+                if event.key == pygame.K_3:
+                    self.initiate_construction(buildings.Farm)
+                if event.key == pygame.K_4:
+                    self.initiate_construction(buildings.Lumbermill)
+                if event.key == pygame.K_5:
+                    self.initiate_construction(buildings.Foundry)
+                if event.key == pygame.K_6:
+                    self.initiate_construction(buildings.Barracks)
+                if event.key == pygame.K_7:
+                    self.initiate_construction(buildings.Siegery)
+                if event.key == pygame.K_8:
+                    self.initiate_construction(buildings.Tower)
             if event.type == pygame.MOUSEBUTTONUP and not overlay_usurped:
                 if event.button == 1:
                     if self.cursor_state == CursorState.Select:
@@ -232,6 +254,8 @@ class Game(Scene):
         self.cursor_state = CursorState.Build
         self.ghost_building = building
         self.selected_entity = None
+        walkmap = pathfinding.create_walkable_map(terrain, self.buildings, buildings.Building.blacklist)
+        self.invalid_tiles = buildings.blocked_tiles(walkmap, self.selector, self.ghost_building)
 
     def finish_construction(self):
         """

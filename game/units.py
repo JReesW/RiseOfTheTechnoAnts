@@ -8,7 +8,6 @@ from game.types import *
 
 import enum, math
 
-hpi = math.pi / 2
 qpi = lambda n: (math.pi / 4) * n
 
 
@@ -28,27 +27,6 @@ class Direction(enum.StrEnum):
     NorthWest = "-X-Y"
     North = "-Y"
     NorthEast = "+X-Y"
-
-
-class UnitSpriteSheets:
-    """
-    Preload sprite sheets
-    """
-    loaded = False
-    worker = None
-    ...
-
-    @staticmethod
-    def load():
-        UnitSpriteSheets.loaded = True
-        UnitSpriteSheets.worker = spritesheet.SpriteSheet("worker")
-
-    @staticmethod
-    def get(name: str) -> spritesheet.SpriteSheet:
-        if not UnitSpriteSheets.loaded: raise Exception("Unit spritesheets haven't been loaded in yet")
-        if name == "worker": return UnitSpriteSheets.worker
-        raise NameError(f"No unit spritesheet found with the name {name}")
-
 
 
 class Unit(Entity):
@@ -77,7 +55,7 @@ class Unit(Entity):
         self.target = None
         self.targets = []
 
-        self.sheet = UnitSpriteSheets.get(unit_type.name)
+        self.sheet = spritesheet.load_spritesheet(unit_type.name)
         self.animation = animation.AnimationHandler(self.sheet)
         self.image = self.sheet.get_sprite("Walk+X0")
 
