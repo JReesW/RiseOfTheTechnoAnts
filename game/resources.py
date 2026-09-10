@@ -2,7 +2,7 @@ import pygame
 
 from engine import image
 from game.entities import Entity
-from game import isometric
+from game import isometric, units, buildings
 from game.types import *
 
 import random
@@ -18,9 +18,34 @@ tree_offsets = [
 ]
 
 
+class Inventory:
+    def __init__(self, wood: int, metal: int, food: int, allegiance: Allegiance):
+        self.wood = wood
+        self.metal = metal
+        self.food = food
+        self.allegiance = allegiance
+
+        self.population = 0
+        self.population_cap = 0
+
+    def update(self, _units: pygame.sprite.Group[units.Unit], _buildings: pygame.sprite.Group[buildings.Building]):
+        pods = 0
+        for building in _buildings:
+            if building.name == "pod" and building.allegiance == self.allegiance:
+                pods += 1
+        self.population_cap = pods * 10
+
+        workers = 0
+        for unit in _units:
+            if unit.name == "worker" and unit.allegiance == self.allegiance:
+                workers += 1
+        self.population = workers
+
+
+
 class Resource(Entity):
     def __init__(self, pos: Coords, bottom_offset, *groups):
-        super().__init__(bottom_offset, *groups)
+        super().__init__(Allegiance.Nature, bottom_offset, *groups)
         self.pos = pos
         self.center = isometric.tile_to_world_coords(*pos)
         self.shadow: pygame.Surface = None

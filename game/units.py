@@ -66,9 +66,9 @@ class Unit(Entity):
     speed: int
     blacklist: list[int]
 
-    def __init__(self, pos: Coords, *groups):
+    def __init__(self, pos: Coords, allegiance: Allegiance, *groups):
         unit_type = type(self)
-        super().__init__(0, *groups)
+        super().__init__(allegiance, 0, *groups)
         self.pos = pos
         self.size = unit_type.size
         self.speed = unit_type.speed

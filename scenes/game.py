@@ -58,19 +58,20 @@ class Game(Scene):
         self.entities = entities.Entities(self.camera)
         self.populate_map()
         self.entities.add(
-            buildings.Nexus((3, 3), self.buildings),
-            buildings.Nexus((26, 58), self.buildings),
-            buildings.Pod((3, 8), self.buildings),
-            buildings.Farm((3, 13), self.buildings),
-            buildings.Barracks((7, 9), self.buildings),
-            buildings.Siegery((7, 13), self.buildings),
-            buildings.Farm((10, 37), self.buildings),
-            buildings.Nexus((20, 35), self.buildings),
-            units.Worker((6, 3), self.units)
+            buildings.Nexus((3, 3), Allegiance.Player, self.buildings),
+            buildings.Nexus((26, 58), Allegiance.Player, self.buildings),
+            buildings.Pod((3, 8), Allegiance.Player, self.buildings),
+            buildings.Farm((3, 13), Allegiance.Player, self.buildings),
+            buildings.Barracks((7, 9), Allegiance.Player, self.buildings),
+            buildings.Siegery((7, 13), Allegiance.Player, self.buildings),
+            buildings.Farm((10, 37), Allegiance.Player, self.buildings),
+            buildings.Nexus((20, 35), Allegiance.Player, self.buildings),
+            units.Worker((6, 3), Allegiance.Player, self.units)
         )
         self.selected_entity = None
 
-        self.overlay = overlay.Overlay(terrain, self.camera)
+        self.inventory = resources.Inventory(50, 50, 50, Allegiance.Player)
+        self.overlay = overlay.Overlay(terrain, self.camera, self.inventory)
     
     def handle_events(self, events):
         mouse = pygame.mouse.get_pos()
@@ -111,6 +112,8 @@ class Game(Scene):
                 
     def update(self, dt):
         self.entities.update(dt)
+        self.inventory.update(self.units, self.buildings)
+        self.overlay.update()
 
         if self.marker is not None:
             x, y, t = self.marker
@@ -237,6 +240,6 @@ class Game(Scene):
         if len(self.invalid_tiles) == 0:
             # check material costs and deduct them
             self.cursor_state = CursorState.Select
-            building = self.ghost_building(self.selector, self.buildings)
+            building = self.ghost_building(self.selector, Allegiance.Player, self.buildings)
             self.entities.add(building)
             # self.selected_entity = building

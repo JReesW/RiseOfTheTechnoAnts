@@ -44,9 +44,9 @@ class Building(Entity):
 
     blacklist: list[int] = [0, 2, 5, 6]
 
-    def __init__(self, pos: Coords, *groups):
+    def __init__(self, pos: Coords, allegiance: Allegiance, *groups):
         building_type = type(self)
-        super().__init__(building_type.bottom_offset, *groups)
+        super().__init__(allegiance, building_type.bottom_offset, *groups)
 
         self.pos = pos
         self.image = image.load_image(building_type.name)

@@ -2,6 +2,7 @@ import pygame
 
 from engine.scene import Camera
 from game import isometric
+from game.types import *
 
 
 """
@@ -35,8 +36,9 @@ class Entities(pygame.sprite.LayeredUpdates):
 class Entity(pygame.sprite.Sprite):
     sound: str = None
 
-    def __init__(self, bottom_offset: int, *groups):
+    def __init__(self, allegiance: Allegiance, bottom_offset: int, *groups):
         super().__init__(*groups)
+        self.allegiance = allegiance
         self.bottom_offset = bottom_offset
         self.entity_group: Entities = None
         self.depth = 0
