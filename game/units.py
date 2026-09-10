@@ -84,7 +84,7 @@ class Unit(Entity):
         rect = pygame.Rect(0, 0, 48, 48)
         self.rect = rect.move_to(center=isometric.tile_to_world_coords(*pos, floating=True))
 
-        self.shadow = image.load_image(f"antshadow")
+        self.shadow = image.load_image(f"shadows/antshadow")
 
     def set_targets(self, targets: list[Coords]):
         self.target = None

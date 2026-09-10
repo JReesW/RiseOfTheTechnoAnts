@@ -32,12 +32,12 @@ class Game(Scene):
         self.audio = audio.AudioHandler()
         self.audio.set_sfx_volume(0.7)
         
-        self.selector_image = image.load_image("selector")
-        self.selected1_image = image.load_image("selected1")
-        self.selected2_image = image.load_image("selected2")
-        self.selected3_image = image.load_image("selected3")
-        self.invalid_image = image.load_image("invalid")
-        self.marker_image = image.load_image("marker")
+        self.selector_image = image.load_image("technical/selector")
+        self.selected1_image = image.load_image("technical/selected1")
+        self.selected2_image = image.load_image("technical/selected2")
+        self.selected3_image = image.load_image("technical/selected3")
+        self.invalid_image = image.load_image("technical/invalid")
+        self.marker_image = image.load_image("technical/marker")
         self.selector = (0, 0)
         self.selector_prev = (0, 0)
         self.marker = None
@@ -142,7 +142,7 @@ class Game(Scene):
                     r = img.get_rect().move_to(center=isometric.world_to_screen_coords(*self.selected_entity.get_center(), self.camera))
                     surface.blit(img, r)
                 case units.Unit():
-                    img = image.load_image("selected_unit")
+                    img = image.load_image("technical/selected_unit")
                     px, py = isometric.tile_to_screen_coords(*self.selected_entity.pos, self.camera, True)
                     r = img.get_rect().move_to(center=(px, py+10))
                     surface.blit(img, r)
@@ -160,7 +160,7 @@ class Game(Scene):
                 surface.blit(self.invalid_image, r)
 
             invalid = '' if len(self.invalid_tiles) == 0 else '_invalid'
-            img = image.load_image(f"{ghost.name}_ghost{invalid}")
+            img = image.load_image(f"buildings/{ghost.name}_ghost{invalid}")
             r = pygame.Rect(0, 0, *img.size)
             px, py = isometric.tile_to_screen_coords(*self.selector, self.camera)
             ox = 80 if ghost.area == buildings.Area.TwoByTwo else 0

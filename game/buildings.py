@@ -49,14 +49,14 @@ class Building(Entity):
         super().__init__(allegiance, building_type.bottom_offset, *groups)
 
         self.pos = pos
-        self.image = image.load_image(building_type.name)
+        self.image = image.load_image(f"buildings/{building_type.name}")
         self.area = building_type.area
         rect = pygame.Rect(0, 0, *self.image.size)
         px, py = isometric.tile_to_world_coords(*self.pos)
         ox = 80 if building_type.area == Area.TwoByTwo else 0  # offset the X from tile center on TwoByTwo
         self.rect = rect.move_to(centerx = px + ox, bottom = py + self.bottom_offset)
 
-        self.shadow = image.load_image(f"shadow{building_type.area}")
+        self.shadow = image.load_image(f"shadows/shadow{building_type.area}")
 
     def occupies_tile(self, tile: Coords) -> bool:
         """

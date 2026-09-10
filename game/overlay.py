@@ -3,7 +3,7 @@ import pygame
 from game import isometric, maps, resources
 from game.types import *
 from engine.scene import Camera
-from engine import colors, image
+from engine import colors, image, text
 
 
 class Overlay:
@@ -26,15 +26,15 @@ class Overlay:
         self.camw, self.camh = self.width * (1920 / ww), self.height * (1080 / wh)
 
         self.inventory = inventory
-        self.inventory_tab_rect = pygame.Rect(0, 0, 600, 50)
+        self.inventory_tab_rect = pygame.Rect(0, 0, 800, 52)
         self.inventory_tab = pygame.Surface(self.inventory_tab_rect.size)
         self.inventory_tab.fill(colors.dark_slate_blue)
         pygame.draw.rect(self.inventory_tab, colors.slate_blue, self.inventory_tab_rect, 3)
         images = ["wood", "metal", "food", "population"]
         for n in range(4):
-            rb = pygame.Rect(150*n + 42, 10, 100, 32)
-            rt = pygame.Rect(150*n + 9, 10, 132, 32)
-            ri = pygame.Rect(150*n + 9, 10, 32, 32)
+            rb = pygame.Rect(200*n + 42, 10, 150, 32)
+            rt = pygame.Rect(200*n + 9, 10, 182, 32)
+            ri = pygame.Rect(200*n + 9, 10, 32, 32)
             pygame.draw.rect(self.inventory_tab, colors.light_steel_blue, rb)
             pygame.draw.rect(self.inventory_tab, colors.slate_gray, ri)
             pygame.draw.rect(self.inventory_tab, colors.black, rt, 1)
@@ -77,3 +77,15 @@ class Overlay:
 
         # inventory tab
         surface.blit(self.inventory_tab, self.inventory_tab_rect)
+        surf, rect = text.render(str(self.inventory.wood), colors.black, "Arial", 28, True)
+        rect.centery, rect.right = self.inventory_tab_rect.centery, 185
+        surface.blit(surf, rect)
+        surf, rect = text.render(str(self.inventory.metal), colors.black, "Arial", 28, True)
+        rect.centery, rect.right = self.inventory_tab_rect.centery, 385
+        surface.blit(surf, rect)
+        surf, rect = text.render(str(self.inventory.food), colors.black, "Arial", 28, True)
+        rect.centery, rect.right = self.inventory_tab_rect.centery, 585
+        surface.blit(surf, rect)
+        surf, rect = text.render(f"{self.inventory.population}/{self.inventory.population_cap}", colors.black, "Arial", 28, True)
+        rect.centery, rect.right = self.inventory_tab_rect.centery, 785
+        surface.blit(surf, rect)

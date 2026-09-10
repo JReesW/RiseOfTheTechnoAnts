@@ -64,7 +64,7 @@ class Tree(Resource):
         self.rect = pygame.Rect(0, 0, *self.image.size).move_to(centerx=self.center[0], bottom=self.center[1]+20)
 
     def generate_trees(self):
-        tree_imgs = [image.load_image("tree1"), image.load_image("tree2")]
+        tree_imgs = [image.load_image("resources/tree1"), image.load_image("resources/tree2")]
         offsets = random.sample(tree_offsets, random.randint(4, 5))
         trees: list[tuple[pygame.Rect, int]] = []
         for x, y in sorted(offsets, key=lambda p: p[1]):
@@ -79,6 +79,6 @@ class Tree(Resource):
         for rect, img in trees:
             r = rect.move(-totalrect.left, -totalrect.top)
             surface.blit(tree_imgs[img], r)
-            self.shadow.blit(image.load_image("treeshadow"), r)
+            self.shadow.blit(image.load_image("shadows/treeshadow"), r)
 
         return surface
