@@ -1,6 +1,6 @@
 import pygame
 from engine.scene import Scene, Camera
-from engine import colors, image, debug, audio
+from engine import colors, image, debug, audio, director
 from settings import SCREEN_SIZE, SCREEN_HEIGHT, SCREEN_WIDTH
 
 from game import isometric, maps, entities, buildings, resources, units, pathfinding, overlay
@@ -64,7 +64,7 @@ class Game(Scene):
             buildings.Siegery((22, 3), Allegiance.Player, self.buildings),
             buildings.Lumbermill((26, 3), Allegiance.Player, self.buildings),
             buildings.Foundry((30, 3), Allegiance.Player, self.buildings),
-            buildings.Tower((7, 7), Allegiance.Player, self.buildings),
+            buildings.Tower((9, 8), Allegiance.Player, self.buildings),
             buildings.Nexus((3, 6), Allegiance.Enemy, self.buildings),
             buildings.Pod((3, 10), Allegiance.Enemy, self.buildings),
             buildings.Farm((3, 14), Allegiance.Enemy, self.buildings),
@@ -87,9 +87,12 @@ class Game(Scene):
 
         for event in events:
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_ESCAPE and self.cursor_state == CursorState.Build:
-                    self.cursor_state = CursorState.Select
-                    self.ghost_building = None
+                if event.key == pygame.K_ESCAPE:
+                    if self.cursor_state == CursorState.Build:
+                        self.cursor_state = CursorState.Select
+                        self.ghost_building = None
+                    else:
+                        director.next_scene = director.get_scene("Pause")(self)
                 if event.key == pygame.K_1:
                     self.initiate_construction(buildings.Nexus)
                 if event.key == pygame.K_2:
