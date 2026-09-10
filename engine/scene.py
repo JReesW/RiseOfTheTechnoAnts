@@ -18,9 +18,7 @@ class Camera:
         """
         Set the center of the camera to the given coords
         """
-        top = pos[0] - self.screen_size[0] / 2
-        left = pos[1] - self.screen_size[1] / 2
-        self.pos = top, left
+        self.rect.center = pos
 
     def move(self, dx: int, dy: int):
         """

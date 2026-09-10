@@ -3,7 +3,7 @@ from engine.scene import Scene, Camera
 from engine import colors, image, debug, audio
 from settings import SCREEN_SIZE, SCREEN_HEIGHT, SCREEN_WIDTH
 
-from game import isometric, maps, entities, buildings, resources, units, pathfinding
+from game import isometric, maps, entities, buildings, resources, units, pathfinding, overlay
 from game.types import *
 
 import random, math, enum
@@ -69,10 +69,13 @@ class Game(Scene):
             units.Worker((6, 3), self.units)
         )
         self.selected_entity = None
+
+        self.overlay = overlay.Overlay(terrain, self.camera)
     
     def handle_events(self, events):
         mouse = pygame.mouse.get_pos()
         pressed = pygame.key.get_pressed()
+        overlay_usurped = self.overlay.handle_events(mouse, events)
 
         for event in events:
             if event.type == pygame.KEYDOWN:
@@ -80,13 +83,13 @@ class Game(Scene):
                     self.initiate_construction(buildings.Nexus)
                 if event.key == pygame.K_2:
                     self.initiate_construction(buildings.Pod)
-            if event.type == pygame.MOUSEBUTTONUP:
+            if event.type == pygame.MOUSEBUTTONUP and not overlay_usurped:
                 if event.button == 1:
                     if self.cursor_state == CursorState.Select:
                         self.select_entity(mouse)
                     elif self.cursor_state == CursorState.Build:
                         self.finish_construction()
-            elif event.type == pygame.MOUSEBUTTONDOWN:
+            elif event.type == pygame.MOUSEBUTTONDOWN and not overlay_usurped:
                 if event.button == 3:
                     self.marker = (*isometric.screen_to_world_coords(*mouse, self.camera), 120)
                     self.check_targeting()
@@ -102,7 +105,7 @@ class Game(Scene):
 
         self.selector_prev = self.selector
         self.selector = isometric.screen_to_tile_coords(*mouse, self.camera)
-        if self.selector[0] < 0 or self.selector[0] >= len(terrain[0]) or self.selector[1] < 0 or self.selector[1] >= len(terrain):
+        if self.selector[0] < 0 or self.selector[0] >= len(terrain[0]) or self.selector[1] < 0 or self.selector[1] >= len(terrain) or overlay_usurped:
             self.selector = None
         debug.debug("selector", self.selector)
                 
@@ -173,6 +176,8 @@ class Game(Scene):
             self.marker_image.set_alpha(255 if t > 20 else pygame.math.remap(20, 0, 255, 0, t))
             surface.blit(self.marker_image, r)
 
+        self.overlay.render(surface)
+
     def select_entity(self, mouse: Coords):
         """
         Detect whether a building or unit is selected by a mouse click
@@ -234,4 +239,4 @@ class Game(Scene):
             self.cursor_state = CursorState.Select
             building = self.ghost_building(self.selector, self.buildings)
             self.entities.add(building)
-            self.selected_entity = building
+            # self.selected_entity = building
