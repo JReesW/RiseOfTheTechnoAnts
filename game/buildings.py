@@ -43,6 +43,7 @@ class Building(Entity):
     area: Area
 
     blacklist: list[int] = [0, 2, 5, 6]
+    max_health = 100  # TODO: ONLY ADD TO SUBCLASSES, NOT HERE
 
     def __init__(self, pos: Coords, allegiance: Allegiance, *groups):
         building_type = type(self)

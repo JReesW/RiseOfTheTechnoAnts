@@ -89,6 +89,8 @@ class Worker(Unit):
     size = 20
     speed = 0.03
     blacklist = [0]
+
+    max_health = 20
     
     def update_state(self, dt):
         self.animation.update(dt)

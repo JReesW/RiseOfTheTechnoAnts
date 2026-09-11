@@ -86,6 +86,7 @@ class Overlay:
         surf, rect = text.render(str(self.inventory.food), colors.black, "Arial", 28, True)
         rect.centery, rect.right = self.inventory_tab_rect.centery, 585
         surface.blit(surf, rect)
-        surf, rect = text.render(f"{self.inventory.population}/{self.inventory.population_cap}", colors.black, "Arial", 28, True)
+        color = colors.black if self.inventory.population <= self.inventory.population_cap else colors.red
+        surf, rect = text.render(f"{self.inventory.population}/{self.inventory.population_cap}", color, "Arial", 28, True)
         rect.centery, rect.right = self.inventory_tab_rect.centery, 785
         surface.blit(surf, rect)

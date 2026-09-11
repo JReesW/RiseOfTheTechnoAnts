@@ -73,7 +73,7 @@ class Game(Scene):
             buildings.Lumbermill((3, 26), Allegiance.Enemy, self.buildings),
             buildings.Foundry((3, 30), Allegiance.Enemy, self.buildings),
             buildings.Tower((7, 10), Allegiance.Enemy, self.buildings),
-            units.Worker((6, 3), Allegiance.Player, self.units)
+            units.Worker((9, 9), Allegiance.Player, self.units)
         )
         self.selected_entity = None
 
@@ -93,6 +93,9 @@ class Game(Scene):
                         self.ghost_building = None
                     else:
                         director.next_scene = director.get_scene("Pause")(self)
+                if event.key == pygame.K_h:
+                    if self.selected_entity is not None:
+                        self.selected_entity.health -= 5
                 if event.key == pygame.K_1:
                     self.initiate_construction(buildings.Nexus)
                 if event.key == pygame.K_2:
@@ -134,6 +137,8 @@ class Game(Scene):
         if self.selector[0] < 0 or self.selector[0] >= len(terrain[0]) or self.selector[1] < 0 or self.selector[1] >= len(terrain) or overlay_usurped:
             self.selector = None
         debug.debug("selector", self.selector)
+        if self.selected_entity is not None:
+            debug.debug("health", self.selected_entity.health)
                 
     def update(self, dt):
         self.entities.update(dt)
@@ -148,6 +153,10 @@ class Game(Scene):
             if self.selector != self.selector_prev and self.selector != None:
                 walkmap = pathfinding.create_walkable_map(terrain, self.buildings, buildings.Building.blacklist)
                 self.invalid_tiles = buildings.blocked_tiles(walkmap, self.selector, self.ghost_building)
+
+        if self.selected_entity is not None:
+            if self.selected_entity.health <= 0:
+                self.selected_entity = None
 
         debug.debug("selected", self.selected_entity.__class__.__name__)
 

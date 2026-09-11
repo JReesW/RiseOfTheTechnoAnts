@@ -1,6 +1,7 @@
 import pygame
 
 from engine.scene import Camera
+from engine import colors
 from game import isometric
 from game.types import *
 
@@ -25,6 +26,12 @@ class Entities(pygame.sprite.LayeredUpdates):
         for sprite in sprites:
             if sprite.rect.colliderect(self.camera.rect):
                 surface.blit(sprite.image, isometric.world_to_screen_coords(*sprite.rect.topleft, self.camera), special_flags=special_flags)
+                if sprite.health < sprite.max_health:
+                    ratio = sprite.health / sprite.max_health
+                    x, y, w, h = *isometric.world_to_screen_coords(*sprite.rect.bottomleft, self.camera), sprite.rect.width, 5
+                    pygame.draw.rect(surface, colors.slate_gray, (x-1, y-1, w+2, h+2))
+                    color = colors.red if ratio <= 0.25 else (colors.orange if ratio <= 0.5 else colors.lime)
+                    pygame.draw.rect(surface, color, (x, y, w * ratio, h))
 
     def draw_shadows(self, surface, bgd = None, special_flags = 0):
         sprites: list[Entity] = self.sprites()
@@ -35,9 +42,11 @@ class Entities(pygame.sprite.LayeredUpdates):
 
 class Entity(pygame.sprite.Sprite):
     sound: str = None
+    max_health: int
 
     def __init__(self, allegiance: Allegiance, bottom_offset: int, *groups):
         super().__init__(*groups)
+        self.health = self.max_health
         self.allegiance = allegiance
         self.bottom_offset = bottom_offset
         self.entity_group: Entities = None
@@ -47,6 +56,13 @@ class Entity(pygame.sprite.Sprite):
         self.depth = self.rect.bottom - self.bottom_offset
         if self.depth != self.layer:
             self.entity_group.change_layer(self, self.depth)
+        if self.health <= 0:
+            self.kill()
+
+    def upgrade_max_health(self, factor: float):
+        entity_type = type(self)
+        entity_type.max_health *= factor
+        self.health = self.max_health
 
     def draw_shadow(self, surface, camera):
         pass

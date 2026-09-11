@@ -44,6 +44,8 @@ class Inventory:
 
 
 class Resource(Entity):
+    max_health = 1
+    
     def __init__(self, pos: Coords, bottom_offset, *groups):
         super().__init__(Allegiance.Nature, bottom_offset, *groups)
         self.pos = pos
