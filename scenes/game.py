@@ -3,10 +3,11 @@ from engine.scene import Scene, Camera
 from engine import colors, image, debug, audio, director
 from settings import SCREEN_SIZE, SCREEN_HEIGHT, SCREEN_WIDTH
 
-from game import isometric, maps, entities, buildings, resources, units, pathfinding, overlay
+from game import isometric, maps, entities, buildings, resources, units, pathfinding, overlay, actions
 from game.types import *
 
 import random, math, enum
+from functools import partial
 
 
 class EntitySelected(Exception):
@@ -27,6 +28,7 @@ with open("resources/output.txt", 'r') as file:
 class Game(Scene):
     def __init__(self):
         isometric.initialize_isometry(len(terrain), 160, 84)
+        self.initialize_actions()
 
         self.audio = audio.AudioHandler()
         self.audio.set_sfx_volume(0.7)
@@ -41,6 +43,7 @@ class Game(Scene):
         self.selector_prev = (0, 0)
         self.marker = None
         self.cursor_state = CursorState.Select
+        self.up_once = True  # has the mouse button gone up since initiating construction?
 
         self.ghost_building = None
         self.invalid_tiles = []
@@ -73,7 +76,8 @@ class Game(Scene):
             buildings.Lumbermill((3, 26), Allegiance.Enemy, self.buildings),
             buildings.Foundry((3, 30), Allegiance.Enemy, self.buildings),
             buildings.Tower((7, 10), Allegiance.Enemy, self.buildings),
-            units.Worker((9, 9), Allegiance.Player, self.units)
+            units.Worker((9, 9), Allegiance.Player, self.units),
+            units.Worker((11, 11), Allegiance.Enemy, self.units)
         )
         self.selected_entity = None
 
@@ -96,28 +100,15 @@ class Game(Scene):
                 if event.key == pygame.K_h:
                     if self.selected_entity is not None:
                         self.selected_entity.health -= 5
-                if event.key == pygame.K_1:
-                    self.initiate_construction(buildings.Nexus)
-                if event.key == pygame.K_2:
-                    self.initiate_construction(buildings.Pod)
-                if event.key == pygame.K_3:
-                    self.initiate_construction(buildings.Farm)
-                if event.key == pygame.K_4:
-                    self.initiate_construction(buildings.Lumbermill)
-                if event.key == pygame.K_5:
-                    self.initiate_construction(buildings.Foundry)
-                if event.key == pygame.K_6:
-                    self.initiate_construction(buildings.Barracks)
-                if event.key == pygame.K_7:
-                    self.initiate_construction(buildings.Siegery)
-                if event.key == pygame.K_8:
-                    self.initiate_construction(buildings.Tower)
             if event.type == pygame.MOUSEBUTTONUP and not overlay_usurped:
                 if event.button == 1:
                     if self.cursor_state == CursorState.Select:
                         self.select_entity(mouse)
                     elif self.cursor_state == CursorState.Build:
-                        self.finish_construction()
+                        if not self.up_once:
+                            self.up_once = True
+                        else:
+                            self.finish_construction()
             elif event.type == pygame.MOUSEBUTTONDOWN and not overlay_usurped:
                 if event.button == 3:
                     self.marker = (*isometric.screen_to_world_coords(*mouse, self.camera), 120)
@@ -143,7 +134,7 @@ class Game(Scene):
     def update(self, dt):
         self.entities.update(dt)
         self.inventory.update(self.units, self.buildings)
-        self.overlay.update()
+        self.overlay.update(self.selected_entity)
 
         if self.marker is not None:
             x, y, t = self.marker
@@ -215,6 +206,21 @@ class Game(Scene):
 
         self.overlay.render(surface)
 
+    def initialize_actions(self):
+        """
+        Set all the onclick functions of the actions
+        """
+        actions.BuildPod.onclick = partial(self.initiate_construction, buildings.Pod)
+        actions.BuildFarm.onclick = partial(self.initiate_construction, buildings.Farm)
+        actions.BuildFoundry.onclick = partial(self.initiate_construction, buildings.Foundry)
+        actions.BuildLumbermill.onclick = partial(self.initiate_construction, buildings.Lumbermill)
+        actions.BuildBarracks.onclick = partial(self.initiate_construction, buildings.Barracks)
+        actions.BuildSiegery.onclick = partial(self.initiate_construction, buildings.Siegery)
+        actions.BuildTower.onclick = partial(self.initiate_construction, buildings.Tower)
+        actions.BuildNexus.onclick = partial(self.initiate_construction, buildings.Nexus)
+
+        actions.CreateWorker.onclick = partial(print, "Creating a worker :))))")
+
     def select_entity(self, mouse: Coords):
         """
         Detect whether a building or unit is selected by a mouse click
@@ -244,12 +250,16 @@ class Game(Scene):
             for x , cell in enumerate(row):
                 if cell == 2:
                     self.entities.add(resources.Tree((x, y), self.resources))
+                elif cell == 5:
+                    self.entities.add(resources.Bush((x, y), self.resources))
+                elif cell == 6:
+                    self.entities.add(resources.Ore((x, y), self.resources))
 
     def check_targeting(self):
         """
         Check whether targeting can be passed onto the selected entity, and do so if it can
         """
-        if isinstance(self.selected_entity, units.Unit):
+        if isinstance(self.selected_entity, units.Unit) and self.selected_entity.allegiance == Allegiance.Player:
             x, y, _ = self.marker
             rounded = round(self.selected_entity.pos[0]), round(self.selected_entity.pos[1])
             path = pathfinding.pathfind(pathfinding.create_walkable_map(terrain, self.buildings, self.selected_entity.blacklist), rounded, isometric.world_to_tile_coords(x, y))
@@ -266,8 +276,10 @@ class Game(Scene):
         self.cursor_state = CursorState.Build
         self.ghost_building = building
         self.selected_entity = None
+        self.up_once = False
         walkmap = pathfinding.create_walkable_map(terrain, self.buildings, buildings.Building.blacklist)
-        self.invalid_tiles = buildings.blocked_tiles(walkmap, self.selector, self.ghost_building)
+        selector = (0, 0) if self.selector is None else self.selector
+        self.invalid_tiles = buildings.blocked_tiles(walkmap, selector, self.ghost_building)
 
     def finish_construction(self):
         """

@@ -45,19 +45,22 @@ class Inventory:
 
 class Resource(Entity):
     max_health = 1
+    shadow_offset = 0
     
     def __init__(self, pos: Coords, bottom_offset, *groups):
         super().__init__(Allegiance.Nature, bottom_offset, *groups)
         self.pos = pos
         self.center = isometric.tile_to_world_coords(*pos)
-        self.shadow: pygame.Surface = None
+        self.shadow: pygame.Surface = image.load_image("shadows/shadow1")
 
     def draw_shadow(self, surface, camera):
-        r = self.rect.move_to(center=isometric.world_to_screen_coords(self.center[0], self.center[1] - 37, camera))
+        r = self.rect.move_to(center=isometric.world_to_screen_coords(self.center[0], self.center[1] + self.shadow_offset, camera))
         surface.blit(self.shadow, r)
 
 
 class Tree(Resource):
+    shadow_offset = -37
+
     def __init__(self, pos: Coords, *groups):
         super().__init__(pos, 0, *groups)
         self.center = isometric.tile_to_world_coords(*pos)
@@ -84,3 +87,24 @@ class Tree(Resource):
             self.shadow.blit(image.load_image("shadows/treeshadow"), r)
 
         return surface
+
+
+class Ore(Resource):
+    shadow_offset = 30
+
+    def __init__(self, pos: Coords, *groups):
+        super().__init__(pos, 0, *groups)
+        self.center = isometric.tile_to_world_coords(*pos)
+
+        self.image = image.load_image("resources/ore")
+        self.rect = pygame.Rect(0, 0, *self.image.size).move_to(centerx=self.center[0], bottom=self.center[1]+20)
+
+
+class Bush(Resource):
+    shadow_offset = 20
+
+    def __init__(self, pos: Coords, *groups):
+        super().__init__(pos, 0, *groups)
+        self.center = isometric.tile_to_world_coords(*pos)
+        self.image = image.load_image("resources/bush")
+        self.rect = pygame.Rect(0, 0, *self.image.size).move_to(centerx=self.center[0], bottom=self.center[1]+20)

@@ -19,14 +19,10 @@ class State(enum.IntEnum):
 
 
 class Direction(enum.StrEnum):
-    East = "+X"
-    SouthEast = "+X+Y"
-    South = "+Y"
-    SouthWest = "-X+Y"
-    West = "-X"
-    NorthWest = "-X-Y"
-    North = "-Y"
-    NorthEast = "+X-Y"
+    East = "X"
+    South = "XF"
+    West = "YF"
+    North = "Y"
 
 
 class Unit(Entity):
@@ -39,7 +35,6 @@ class Unit(Entity):
      - `speed`: their movement speed (floatingtile/tick)
      - `blacklist`: list of terrain values they can't move through
     """
-    name: str
     size: int
     speed: int
     blacklist: list[int]
@@ -55,11 +50,11 @@ class Unit(Entity):
         self.target = None
         self.targets = []
 
-        self.sheet = spritesheet.load_spritesheet(unit_type.name)
+        self.sheet = spritesheet.load_spritesheet(unit_type.name + ('' if self.allegiance == Allegiance.Player else '_red'))
         self.animation = animation.AnimationHandler(self.sheet)
-        self.image = self.sheet.get_sprite("Walk+X0")
+        self.image = self.sheet.get_sprite("WalkX0")
 
-        rect = pygame.Rect(0, 0, 48, 48)
+        rect = self.image.get_rect()  # pygame.Rect(0, 0, 48, 48)
         self.rect = rect.move_to(center=isometric.tile_to_world_coords(*pos, floating=True))
 
         self.shadow = image.load_image(f"shadows/antshadow")

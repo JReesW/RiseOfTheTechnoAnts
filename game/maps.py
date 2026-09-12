@@ -12,8 +12,6 @@ import random
 
 ground = None
 water = None
-bush = None
-ore = None
 ground_tiles = None
 water_tiles = None
 
@@ -22,19 +20,15 @@ def load_images():
     """
     God I wanna do this differently, but for the time being...
     """
-    global ground, water, trees, bush, ore, ground_tiles, water_tiles
+    global ground, water, ground_tiles, water_tiles
     ground = image.load_image("tiles/ground_textured")
     water = image.load_image("tiles/water")
-    bush = image.load_image("tiles/ground_bush")
-    ore = image.load_image("tiles/ground_ore")
     ground_tiles = [pygame.transform.flip(ground, bool(n % 2), bool(n // 2)) for n in range(4)]
     water_tiles = [pygame.transform.flip(water, bool(n % 2), bool(n // 2)) for n in range(4)]
 
 
 def select_image(cell: int) -> pygame.Surface:
     if cell == 0: return water_tiles[random.randint(0, 3)]
-    if cell == 5: return bush
-    if cell == 6: return ore
     return ground_tiles[random.randint(0, 3)]
 
 

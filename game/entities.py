@@ -41,6 +41,7 @@ class Entities(pygame.sprite.LayeredUpdates):
 
 
 class Entity(pygame.sprite.Sprite):
+    name: str
     sound: str = None
     max_health: int
 

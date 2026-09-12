@@ -1,9 +1,15 @@
 import pygame
 
-from game import isometric, maps, resources
+from game import isometric, maps, resources, entities, units, buildings, actions
 from game.types import *
 from engine.scene import Camera
 from engine import colors, image, text
+
+
+actions_dictionary = {
+    "worker": [actions.BuildPod, actions.BuildFarm, actions.BuildLumbermill, actions.BuildFoundry, actions.BuildBarracks, actions.BuildSiegery, actions.BuildTower],
+    "nexus": [actions.CreateWorker]
+}
 
 
 class Overlay:
@@ -12,6 +18,7 @@ class Overlay:
     """
 
     def __init__(self, terrain: Tilemap, camera: Camera, inventory: resources.Inventory):
+        # minimap
         self.size = self.width, self.height = (320, 168)
         self.minimap = maps.generate_minimap(terrain, self.size)
         self.minimap_rect = pygame.Rect(0, 0, self.width, self.height).move_to(topright=(1910, 10))
@@ -25,6 +32,7 @@ class Overlay:
         ww, wh = isometric.get_world_size()
         self.camw, self.camh = self.width * (1920 / ww), self.height * (1080 / wh)
 
+        # resources inventory
         self.inventory = inventory
         self.inventory_tab_rect = pygame.Rect(0, 0, 800, 52)
         self.inventory_tab = pygame.Surface(self.inventory_tab_rect.size)
@@ -39,6 +47,14 @@ class Overlay:
             pygame.draw.rect(self.inventory_tab, colors.slate_gray, ri)
             pygame.draw.rect(self.inventory_tab, colors.black, rt, 1)
             self.inventory_tab.blit(image.load_image(f"icons/{images[n]}"), ri)
+
+        # actions menu
+        self.actions_menu_rect = pygame.Rect(0, 0, 260, 180).move_to(bottomleft=(0, 1080))
+        self.actions_menu = pygame.Surface((260, 180))
+        self.actions_menu.fill(colors.dark_slate_blue)
+        pygame.draw.rect(self.actions_menu, colors.slate_blue, self.actions_menu.get_rect(), 3)
+        self.selected_entity = None
+        self.actions_rects = [pygame.Rect(n % 4 * 60 + 10, (n // 4) * 80 + 910, 60, 80) for n in range(8)]
 
     def handle_events(self, mouse: Coords, events: list[pygame.event.Event]) -> bool:
         """
@@ -58,10 +74,18 @@ class Overlay:
             return True
         elif self.inventory_tab_rect.collidepoint(mouse):
             return True
+        elif self.selected_entity is not None and self.actions_menu_rect.collidepoint(mouse):
+            for event in events:
+                if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                    if self.selected_entity.name in actions_dictionary:  # TODO: is name in dictionary check necessary at the end?
+                        for n, action in enumerate(actions_dictionary[self.selected_entity.name]):
+                            if self.actions_rects[n].collidepoint(mouse):
+                                action.onclick()
+            return True
         return False
 
-    def update(self):
-        pass
+    def update(self, selected: entities.Entity):
+        self.selected_entity = selected
 
     def render(self, surface: pygame.Surface):
         # minimap
@@ -90,3 +114,12 @@ class Overlay:
         surf, rect = text.render(f"{self.inventory.population}/{self.inventory.population_cap}", color, "Arial", 28, True)
         rect.centery, rect.right = self.inventory_tab_rect.centery, 785
         surface.blit(surf, rect)
+
+        # actions menu
+        if self.selected_entity is not None and self.selected_entity.allegiance == Allegiance.Player:
+            surface.blit(self.actions_menu, self.actions_menu_rect)
+
+            if self.selected_entity.name in actions_dictionary:
+                for n, action in enumerate(actions_dictionary[self.selected_entity.name]):
+                    img = image.load_image(f"actions/{action.name}")
+                    surface.blit(img, self.actions_rects[n])

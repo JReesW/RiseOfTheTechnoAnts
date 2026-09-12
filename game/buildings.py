@@ -38,7 +38,6 @@ class Building(Entity):
      - `bottom_offset`: how far the rect's bottom has to be offset from the position
      - `area`: the dimensions of how many tiles it takes in place
     """
-    name: str
     bottom_offset: int
     area: Area
 
