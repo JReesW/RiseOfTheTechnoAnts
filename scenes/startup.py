@@ -1,20 +1,25 @@
 import pygame
 from engine.scene import Scene
 from engine import colors, image, mouse, debug, audio, director
+from game import saveSystem
 
 class Startup(Scene):
     def __init__(self, *args, **kwargs):
+        saveSystem.load_save_data()
         self.time = 0
         self.logo = image.load_image("teamlogo").convert_alpha()
 
         self.state = 0
 
         self.audio_handler = audio.AudioHandler()
+        self.audio_handler.sfx_volume = saveSystem.saveData["soundVolume"]
+        self.audio_handler.music_volume = saveSystem.saveData["musicVolume"]
     
     def handle_events(self, events):
-        for event in events:
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
-                self.space_held = not self.space_held
+        pass
+        # for event in events:
+        #     if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
+        #         self.space_held = not self.space_held
     
     def update(self, dt):
         self.time += dt / 1000
@@ -24,7 +29,7 @@ class Startup(Scene):
             self.audio_handler.play_music("palmtune 8", loops=0)
 
         if self.time > 4:
-            director.change_scene("Fade", self, "Game")
+            director.change_scene("Fade", self, "MainMenu")
 
         debug.debug("time", self.time)
         debug.debug("state", self.state)
