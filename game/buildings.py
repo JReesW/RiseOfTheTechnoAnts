@@ -81,6 +81,7 @@ class Building(Entity):
 
 class Nexus(Building):
     name = "nexus"
+    display_name = "Nexus"
     bottom_offset = 74
     area = Area.ThreeByThree
     sound = "nexus"
@@ -88,6 +89,7 @@ class Nexus(Building):
 
 class Pod(Building):
     name = "pod"
+    display_name = "Pod"
     bottom_offset = 52
     area = Area.TwoByTwo
     sound = "pod"
@@ -95,6 +97,7 @@ class Pod(Building):
 
 class Tower(Building):
     name = "tower"
+    display_name = "Tower"
     bottom_offset = 50
     area = Area.TwoByTwo
 
@@ -115,12 +118,14 @@ class Tower(Building):
 
 class Farm(Building):
     name = "fungusfarm"
+    display_name = "Fungus Farm"
     bottom_offset = 84
     area = Area.ThreeByThree
 
 
 class Lumbermill(Building):
     name = "lumbermill"
+    display_name = "Lumbermill"
     bottom_offset = 94
     area = Area.ThreeByThree
 
@@ -132,6 +137,8 @@ class Lumbermill(Building):
 
 class Foundry(Building):
     name = "foundry"
+    display_name = "Foundry"
+    sound = "foundry"
     bottom_offset = 104
     area = Area.ThreeByThree
 
@@ -143,11 +150,13 @@ class Foundry(Building):
 
 class Barracks(Building):
     name = "barracks"
+    display_name = "Barracks"
     bottom_offset = 104
     area = Area.ThreeByThree
 
 
 class Siegery(Building):
     name = "siegery"
+    display_name = "Siegery"
     bottom_offset = 84
     area = Area.ThreeByThree

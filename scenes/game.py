@@ -73,7 +73,8 @@ class Game(Scene):
             units.Worker((22, 23), Allegiance.Player, self.units),
             units.Worker((22, 24), Allegiance.Player, self.units),
             units.Worker((11, 11), Allegiance.Enemy, self.units),
-            units.Soldier((13, 13), Allegiance.Player, self.units)
+            units.Queen((13, 13), Allegiance.Player, self.units),
+            units.Queen((14, 14), Allegiance.Enemy, self.units)
         )
         self.selected_entity = None
         director.global_data["entities"] = self.entities

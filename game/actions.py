@@ -59,3 +59,8 @@ class BuildTower(Action):
 class CreateWorker(Action):
     name = "worker"
     cost = (0, 0, 2)
+
+
+class CreateQueen(Action):
+    name = "queen"
+    cost = (0, 0, 2)

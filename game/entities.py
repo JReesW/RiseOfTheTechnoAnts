@@ -49,6 +49,7 @@ class Entity(pygame.sprite.Sprite):
     sound: str = None
     max_health: int
     is_implosion = False
+    display_name: str
 
     def __init__(self, allegiance: Allegiance, bottom_offset: int, *groups):
         super().__init__(*groups)
@@ -76,13 +77,14 @@ class Entity(pygame.sprite.Sprite):
     def draw_shadow(self, surface, camera):
         pass
 
-    def kill(self):
-        if not self.is_implosion:
+    def kill(self, silent: bool = False):
+        if not self.is_implosion and not silent:
             self.entity_group.add(Implosion(self.rect, self.image))
         super().kill()
 
 
 class Implosion(Entity):
+    name = "implosion"
     is_implosion = True
     max_health = 1
 

@@ -140,6 +140,8 @@ class Unit(Entity):
 
 class Worker(Unit):
     name = "worker"
+    sound = "worker"
+    display_name = "Worker"
     size = 20
     speed = 0.03
     blacklist = [0]
@@ -196,8 +198,39 @@ class Worker(Unit):
                 self.task = None
 
 
+class Queen(Unit):
+    name = "queen"
+    sound = "queen"
+    display_name = "Queen"
+    size = 20
+    speed = 0.02
+    blacklist = [0]
+
+    max_health = 15
+
+    def set_task(self, pos: Coords):
+        """
+        Check if a task can be set for this unit if it has been sent somewhere
+        """
+        self.task = None
+        self.carrying = None
+
+    def update_task(self):
+        match self.task:
+            case Build(ghost_building=ghost_building, pos=pos, allegiance=allegiance, returnpos=returnpos):
+                building = ghost_building(pos, allegiance, director.global_data["buildings"])
+                director.global_data["entities"].add(building)
+
+                rounded = round(self.pos[0]), round(self.pos[1])
+                path = pathfinding.pathfind(pathfinding.create_walkable_map(director.global_data["terrain"], director.global_data["buildings"], self.blacklist, building), rounded, returnpos)
+                self.set_targets(path)
+
+                self.kill(silent=True)
+
+
 class Soldier(Unit):
     name = "soldier"
+    display_name = "Soldier"
     size = 25
     speed = 0.05
     blacklist = [0]
