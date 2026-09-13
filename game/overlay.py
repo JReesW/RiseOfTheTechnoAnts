@@ -7,8 +7,12 @@ from engine import colors, image, text
 
 
 actions_dictionary = {
-    "worker": [actions.BuildPod, actions.BuildFarm, actions.BuildLumbermill, actions.BuildFoundry, actions.BuildBarracks, actions.BuildSiegery, actions.BuildTower],
+    # buildings
     "nexus": [actions.CreateWorker, actions.CreateQueen],
+    "barracks": [actions.CreateSoldier, actions.CreatePhrag],
+    "siegery": [actions.CreateAlate, actions.CreateMajor],
+    # units
+    "worker": [actions.BuildPod, actions.BuildFarm, actions.BuildLumbermill, actions.BuildFoundry, actions.BuildBarracks, actions.BuildSiegery, actions.BuildTower],
     "queen": [actions.BuildNexus]
 }
 
@@ -160,7 +164,9 @@ class Overlay:
                 surface.blit(tooltip, tooltip.get_rect(topleft=self.mouse))
 
     def generate_tooltips(self):
-        # create pairings of surfaces and booleans, bools are for whether the tooltip should use topleft (False) or bottomleft (True) as anchor
+        """
+        Create pairings of surfaces and booleans, bools are for whether the tooltip should use topleft (False) or bottomleft (True) as anchor
+        """
         self.tooltips["wood"] = (simple_tooltip("Wood"), False)
         self.tooltips["metal"] = (simple_tooltip("Metal"), False)
         self.tooltips["food"] = (simple_tooltip("Food"), False)
@@ -175,6 +181,13 @@ class Overlay:
         self.tooltips["siegery"] = (costly_tooltip("Siegery", (100, 50, 30), "Creates stronger mechanical ants"), True)
         self.tooltips["tower"] = (costly_tooltip("Tower", (100, 50, 30), "Attacks nearby enemies"), True)
 
+        self.tooltips["worker"] = (costly_tooltip("Worker", (100, 50, 30), "Collects resources and builds structures"), True)
+        self.tooltips["queen"] = (costly_tooltip("Queen", (100, 50, 30), "Capable of creating a new Nexus"), True)
+        self.tooltips["soldier"] = (costly_tooltip("Soldier", (100, 50, 30), "Basic foot soldier"), True)
+        self.tooltips["phrag"] = (costly_tooltip("Phragmotist", (100, 50, 30), "Soldier with a shielded head, granting extra defence"), True)
+        self.tooltips["alate"] = (costly_tooltip("Alate", (100, 50, 30), "Jet-powered, low-flying kamikaze that deals a ton of damage to buildings"), True)
+        self.tooltips["major"] = (costly_tooltip("Major", (100, 50, 30), "Large, technologically enhanced soldier. Has trouble walking through forests"), True)
+
 
 def simple_tooltip(txt: str) -> pygame.Surface:
     """
@@ -188,12 +201,12 @@ def simple_tooltip(txt: str) -> pygame.Surface:
     return tooltip
 
 
-def costly_tooltip(txt: str, cost: tuple[int, int, int], description: str):
+def costly_tooltip(title: str, cost: tuple[int, int, int], description: str):
     """
     Create a tooltip for something with a label, material costs, and a description
     """
     backdrop = image.load_image("technical/costly_tooltip")
-    name_s, _ = text.render(txt, colors.white, "Arial", 18, True)
+    name_s, _ = text.render(title, colors.white, "Arial", 18, True)
     wood_s, _ = text.render(str(cost[0]), colors.white, "Arial", 18, True)
     metal_s, _ = text.render(str(cost[1]), colors.white, "Arial", 18, True)
     food_s, _ = text.render(str(cost[2]), colors.white, "Arial", 18, True)

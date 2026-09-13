@@ -236,3 +236,33 @@ class Soldier(Unit):
     blacklist = [0]
 
     max_health = 40
+
+
+class Phrag(Unit):
+    name = "phrag"
+    display_name = "Phragmotist"
+    size = 25
+    speed = 0.05
+    blacklist = [0]
+
+    max_health = 40
+
+
+class Major(Unit):
+    name = "major"
+    display_name = "Major"
+    size = 25
+    speed = 0.05
+    blacklist = [0, 2, 5, 6]
+
+    max_health = 40
+
+
+class Alate(Unit):
+    name = "alate"
+    display_name = "Alate"
+    size = 25
+    speed = 0.05
+    blacklist = []
+
+    max_health = 40

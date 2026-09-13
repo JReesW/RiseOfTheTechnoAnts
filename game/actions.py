@@ -64,3 +64,23 @@ class CreateWorker(Action):
 class CreateQueen(Action):
     name = "queen"
     cost = (0, 0, 2)
+
+
+class CreateSoldier(Action):
+    name = "soldier"
+    cost = (0, 0, 2)
+
+
+class CreatePhrag(Action):
+    name = "phrag"
+    cost = (0, 0, 2)
+
+
+class CreateAlate(Action):
+    name = "alate"
+    cost = (0, 0, 2)
+
+
+class CreateMajor(Action):
+    name = "major"
+    cost = (0, 0, 2)
