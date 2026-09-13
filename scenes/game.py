@@ -43,7 +43,6 @@ class Game(Scene):
         self.selector_prev = (0, 0)
         self.marker = None
         self.cursor_state = CursorState.Select
-        self.up_once = True  # has the mouse button gone up since initiating construction?
 
         self.ghost_building = None
         self.invalid_tiles = []
@@ -63,26 +62,30 @@ class Game(Scene):
             buildings.Nexus((6, 3), Allegiance.Player, self.buildings),
             buildings.Pod((10, 3), Allegiance.Player, self.buildings),
             buildings.Farm((14, 3), Allegiance.Player, self.buildings),
-            buildings.Barracks((18, 3), Allegiance.Player, self.buildings),
-            buildings.Siegery((22, 3), Allegiance.Player, self.buildings),
-            buildings.Lumbermill((26, 3), Allegiance.Player, self.buildings),
-            buildings.Foundry((30, 3), Allegiance.Player, self.buildings),
-            buildings.Tower((9, 8), Allegiance.Player, self.buildings),
             buildings.Nexus((3, 6), Allegiance.Enemy, self.buildings),
             buildings.Pod((3, 10), Allegiance.Enemy, self.buildings),
             buildings.Farm((3, 14), Allegiance.Enemy, self.buildings),
-            buildings.Barracks((3, 18), Allegiance.Enemy, self.buildings),
-            buildings.Siegery((3, 22), Allegiance.Enemy, self.buildings),
-            buildings.Lumbermill((3, 26), Allegiance.Enemy, self.buildings),
-            buildings.Foundry((3, 30), Allegiance.Enemy, self.buildings),
             buildings.Tower((7, 10), Allegiance.Enemy, self.buildings),
-            units.Worker((9, 9), Allegiance.Player, self.units),
-            units.Worker((11, 11), Allegiance.Enemy, self.units)
+            units.Worker((21, 22), Allegiance.Player, self.units),
+            units.Worker((21, 23), Allegiance.Player, self.units),
+            units.Worker((21, 24), Allegiance.Player, self.units),
+            units.Worker((22, 22), Allegiance.Player, self.units),
+            units.Worker((22, 23), Allegiance.Player, self.units),
+            units.Worker((22, 24), Allegiance.Player, self.units),
+            units.Worker((11, 11), Allegiance.Enemy, self.units),
+            units.Soldier((13, 13), Allegiance.Player, self.units)
         )
         self.selected_entity = None
+        director.global_data["entities"] = self.entities
+        director.global_data["buildings"] = self.buildings
+        director.global_data["units"] = self.units
+        director.global_data["terrain"] = terrain
 
         self.inventory = resources.Inventory(50, 50, 50, Allegiance.Player)
+        self.enemy_inventory = resources.Inventory(50, 50, 50, Allegiance.Enemy)
         self.overlay = overlay.Overlay(terrain, self.camera, self.inventory)
+        director.global_data["player_inventory"] = self.inventory
+        director.global_data["enemy_inventory"] = self.enemy_inventory
     
     def handle_events(self, events):
         mouse = pygame.mouse.get_pos()
@@ -105,10 +108,7 @@ class Game(Scene):
                     if self.cursor_state == CursorState.Select:
                         self.select_entity(mouse)
                     elif self.cursor_state == CursorState.Build:
-                        if not self.up_once:
-                            self.up_once = True
-                        else:
-                            self.finish_construction()
+                        self.finish_construction()
             elif event.type == pygame.MOUSEBUTTONDOWN and not overlay_usurped:
                 if event.button == 3:
                     self.marker = (*isometric.screen_to_world_coords(*mouse, self.camera), 120)
@@ -130,6 +130,9 @@ class Game(Scene):
         debug.debug("selector", self.selector)
         if self.selected_entity is not None:
             debug.debug("health", self.selected_entity.health)
+            if isinstance(self.selected_entity, units.Unit):
+                debug.debug("task", self.selected_entity.task.__class__.__name__)
+                debug.debug("target", self.selected_entity.target)
                 
     def update(self, dt):
         self.entities.update(dt)
@@ -191,6 +194,17 @@ class Game(Scene):
             ox = 80 if ghost.area == buildings.Area.TwoByTwo else 0
             r = r.move_to(centerx = px + ox, bottom = py + ghost.bottom_offset)
             surface.blit(img, r)
+
+        # if a worker is busy building, show the building's ghost
+        for unit in self.units:
+            if unit.allegiance == Allegiance.Player and isinstance(unit.task, units.Build):
+                ghost = unit.task.ghost_building
+                img = image.load_image(f"buildings/{ghost.name}_ghost")
+                r = pygame.Rect(0, 0, *img.size)
+                px, py = isometric.tile_to_screen_coords(*unit.task.pos, self.camera)
+                ox = 80 if ghost.area == buildings.Area.TwoByTwo else 0
+                r = r.move_to(centerx = px + ox, bottom = py + ghost.bottom_offset)
+                surface.blit(img, r)
 
         # Draw all entities and their shadows
         self.entities.draw_shadows(surface)
@@ -266,6 +280,7 @@ class Game(Scene):
             if path:
                 path[-1] = isometric.world_to_tile_coords(x, y, True)
                 self.selected_entity.set_targets(path)
+                self.selected_entity.set_task((x, y))
             else:
                 pass  # TODO: PLAY FAIL SOUND EFFECT
 
@@ -275,8 +290,6 @@ class Game(Scene):
         """
         self.cursor_state = CursorState.Build
         self.ghost_building = building
-        self.selected_entity = None
-        self.up_once = False
         walkmap = pathfinding.create_walkable_map(terrain, self.buildings, buildings.Building.blacklist)
         selector = (0, 0) if self.selector is None else self.selector
         self.invalid_tiles = buildings.blocked_tiles(walkmap, selector, self.ghost_building)
@@ -286,8 +299,10 @@ class Game(Scene):
         Place the ghost building
         """
         if len(self.invalid_tiles) == 0:
-            # check material costs and deduct them
+            rounded = round(self.selected_entity.pos[0]), round(self.selected_entity.pos[1])
+            self.selected_entity.task = units.Build(self.ghost_building, self.selector, Allegiance.Player, rounded)
+            path = pathfinding.pathfind(pathfinding.create_walkable_map(terrain, self.buildings, self.selected_entity.blacklist), rounded, self.selector)
+            self.selected_entity.set_targets(path)
+
             self.cursor_state = CursorState.Select
-            building = self.ghost_building(self.selector, Allegiance.Player, self.buildings)
-            self.entities.add(building)
-            # self.selected_entity = building
+            self.selected_entity = None

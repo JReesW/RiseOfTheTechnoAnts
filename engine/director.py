@@ -11,6 +11,7 @@ scene: Scene = None
 next_scene: Scene = None
 audio: AudioHandler = AudioHandler()
 level_select = None
+global_data = {}
 
 
 def change_scene(_scene: str, *args, **kwargs) -> None:

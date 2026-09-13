@@ -32,6 +32,10 @@ class Entities(pygame.sprite.LayeredUpdates):
                     pygame.draw.rect(surface, colors.slate_gray, (x-1, y-1, w+2, h+2))
                     color = colors.red if ratio <= 0.25 else (colors.orange if ratio <= 0.5 else colors.lime)
                     pygame.draw.rect(surface, color, (x, y, w * ratio, h))
+                if sprite.name == "worker" and sprite.carrying is not None:
+                    img = image.load_image(f"icons/{sprite.carrying}")
+                    r = img.get_rect(midbottom=isometric.world_to_screen_coords(*sprite.rect.midtop, self.camera))
+                    surface.blit(img, r)
 
     def draw_shadows(self, surface, bgd = None, special_flags = 0):
         sprites: list[Entity] = self.sprites()

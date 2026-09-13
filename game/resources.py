@@ -41,6 +41,14 @@ class Inventory:
                 workers += 1
         self.population = workers
 
+    def add(self, item: str, building_type: str):
+        amount = 1 if building_type == "nexus" else 2
+        if item == "wood":
+            self.wood += amount
+        elif item == "ore":
+            self.metal += amount
+        elif item == "leaves":
+            self.food += amount
 
 
 class Resource(Entity):
@@ -60,6 +68,7 @@ class Resource(Entity):
 
 class Tree(Resource):
     shadow_offset = -37
+    name = "tree"
 
     def __init__(self, pos: Coords, *groups):
         super().__init__(pos, 0, *groups)
@@ -73,7 +82,7 @@ class Tree(Resource):
         offsets = random.sample(tree_offsets, random.randint(4, 5))
         trees: list[tuple[pygame.Rect, int]] = []
         for x, y in sorted(offsets, key=lambda p: p[1]):
-            rect = pygame.Rect(0, 0, 42, 84).move_to(centerx = x, bottom = y)
+            rect = pygame.Rect(0, 0, 52, 80).move_to(centerx = x, bottom = y)
             img = random.randint(0, 1)
             trees.append((rect, img))
         r1, *rects = [r for r, _ in trees]
@@ -91,6 +100,7 @@ class Tree(Resource):
 
 class Ore(Resource):
     shadow_offset = 30
+    name = "ore"
 
     def __init__(self, pos: Coords, *groups):
         super().__init__(pos, 0, *groups)
@@ -102,6 +112,7 @@ class Ore(Resource):
 
 class Bush(Resource):
     shadow_offset = 20
+    name = "bush"
 
     def __init__(self, pos: Coords, *groups):
         super().__init__(pos, 0, *groups)

@@ -32,11 +32,6 @@ def blocked_tiles(walkmap: Tilemap, pos: Coords, building_type: type[Building]) 
 class Building(Entity):
     """
     Entities bound by the grid, their pos is tile-based
-
-     - `pos`: its tile coordinates
-     - `image_name`: the basis for all image names of this building
-     - `bottom_offset`: how far the rect's bottom has to be offset from the position
-     - `area`: the dimensions of how many tiles it takes in place
     """
     bottom_offset: int
     area: Area

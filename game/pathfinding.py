@@ -18,7 +18,7 @@ dirs = [
 ]
 
 
-def create_walkable_map(terrain: Tilemap, buildings: pygame.sprite.Group[Building], blacklist: list[int]) -> Tilemap:
+def create_walkable_map(terrain: Tilemap, buildings: pygame.sprite.Group[Building], blacklist: list[int], goal_building: Building = None) -> Tilemap:
     """
     Create a tilemap indicating which tile is walkable (1) and which isn't (0)
     """
@@ -31,7 +31,7 @@ def create_walkable_map(terrain: Tilemap, buildings: pygame.sprite.Group[Buildin
             walkmap[y].append(0 if cell in blacklist else 1)
 
     # Mark tiles occupied by buildings as non-walkable
-    for building in buildings:
+    for building in [b for b in buildings if b != goal_building]:
         bx, by = building.pos
         x1, x2, y1, y2 = 0, 0, 0, 0
         if building.area >= Area.TwoByTwo: x2, y1 = 1, -1
