@@ -87,13 +87,22 @@ class Unit(Entity):
         self.shadow = image.load_image(f"shadows/antshadow")
 
     def set_targets(self, targets: list[Coords]):
+        """
+        Set the path of targets this unit must follow
+        """
         self.target = None
         self.targets = targets
 
     def set_task(self, pos: Coords):
+        """
+        Check if a task can be set for this unit if it has been sent somewhere
+        """
         pass
 
     def update_task(self):
+        """
+        Handle how the task at hand must change once this unit is standing still while not idling
+        """
         pass
 
     def update(self, dt):
@@ -209,9 +218,6 @@ class Queen(Unit):
     max_health = 15
 
     def set_task(self, pos: Coords):
-        """
-        Check if a task can be set for this unit if it has been sent somewhere
-        """
         self.task = None
         self.carrying = None
 

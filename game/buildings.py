@@ -3,6 +3,7 @@ import pygame
 from engine import image, spritesheet, animation
 from engine.scene import Camera
 from game import isometric
+import game.actions as actions
 from game.entities import Entity
 from game.types import *
 
@@ -53,6 +54,8 @@ class Building(Entity):
 
         self.shadow = image.load_image(f"shadows/shadow{building_type.area}")
 
+        self.action_processor = actions.ActionProcessor(self)
+
     def occupies_tile(self, tile: Coords) -> bool:
         """
         Return whether this building occupies the given tile
@@ -73,6 +76,16 @@ class Building(Entity):
         if self.area == Area.TwoByTwo:
             return px + 80, py
         return px, py
+
+    def spawn_entity(self, entity: Entity):
+        """
+        Spawn an entity around this building
+        """
+        pass
+
+    def update(self, dt):
+        super().update(dt)
+        self.action_processor.update()
 
     def draw_shadow(self, surface: pygame.Surface, camera: Camera):
         r = pygame.Rect(0, 0, *self.shadow.size).move_to(center=isometric.world_to_screen_coords(*self.get_center(), camera))
