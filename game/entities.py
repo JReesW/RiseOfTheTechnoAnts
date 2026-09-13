@@ -1,7 +1,7 @@
 import pygame
 
 from engine.scene import Camera
-from engine import colors
+from engine import colors, image
 from game import isometric
 from game.types import *
 
@@ -44,6 +44,7 @@ class Entity(pygame.sprite.Sprite):
     name: str
     sound: str = None
     max_health: int
+    is_implosion = False
 
     def __init__(self, allegiance: Allegiance, bottom_offset: int, *groups):
         super().__init__(*groups)
@@ -65,5 +66,65 @@ class Entity(pygame.sprite.Sprite):
         entity_type.max_health *= factor
         self.health = self.max_health
 
+    def hurt(self, damage: int):
+        self.health -= damage
+
     def draw_shadow(self, surface, camera):
         pass
+
+    def kill(self):
+        if not self.is_implosion:
+            self.entity_group.add(Implosion(self.rect, self.image))
+        super().kill()
+
+
+class Implosion(Entity):
+    is_implosion = True
+    max_health = 1
+
+    def __init__(self, rect: pygame.Rect, img: pygame.Surface, *groups):
+        super().__init__(Allegiance.Nature, 0, *groups)
+        self.t = 0
+        # self.rect = rect
+        self.width = rect.width
+        self.blast_point = 30
+        self.total_time = 90
+        self.building_image = img
+        self.image = pygame.Surface((self.width * 2, self.width * 2), pygame.SRCALPHA)
+        self.rect = pygame.Rect(0, 0, self.width * 2, self.width * 2).move_to(center=rect.center)
+
+        # animation parameters
+        self.circle_a = 0
+        self.circle_r = 0
+        self.ring_a = 0
+        self.ring_r = 0
+        self.image_a = 0
+
+    def update(self, dt):
+        if self.t < self.blast_point:
+            self.circle_a = int(pygame.math.remap(0, self.blast_point, 0, 255, self.t))
+            self.circle_r = int(pygame.math.remap(0, self.blast_point, self.width, 0, self.t))
+            if self.t < self.blast_point//3:
+                self.image_a = int(pygame.math.remap(0, self.blast_point//3, 255, 0, self.t))
+        elif self.t < self.total_time:
+            self.circle_a = int(pygame.math.remap(self.blast_point, self.total_time, 255, 0, self.t))
+            self.circle_r = int(pygame.math.remap(self.blast_point, self.total_time, 0, self.width * 1.5, self.t))
+            self.ring_a = int(pygame.math.remap(self.blast_point, self.total_time, 255, 0, self.t))
+            self.ring_r = int(pygame.math.remap(self.blast_point, self.total_time, 0, self.width * 2, self.t))
+        else:
+            self.kill()
+
+        self.image.fill((0, 0, 0, 0))
+        circle = pygame.transform.scale(image.load_image("technical/implosion"), (self.circle_r, self.circle_r))
+        circle.set_alpha(self.circle_a)
+        ring = pygame.transform.scale(image.load_image("technical/implosion_ring"), (self.ring_r, self.ring_r))
+        ring.set_alpha(self.ring_a)
+        self.building_image.set_alpha(self.image_a)
+        if self.t < self.blast_point//3:
+            self.image.blit(self.building_image, self.building_image.get_rect(center=self.image.get_rect().center))
+        self.image.blit(circle, circle.get_rect(center=self.image.get_rect().center))
+        if self.t >= self.blast_point:
+            self.image.blit(ring, ring.get_rect(center=self.image.get_rect().center))
+
+        self.t += 1
+        return super().update(dt)
