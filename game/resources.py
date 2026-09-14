@@ -1,0 +1,134 @@
+import pygame
+
+from engine import image
+from game.entities import Entity
+from game import isometric, units, buildings
+from game.types import *
+
+import random
+
+
+tree_offsets = [
+    (-10, 22),
+    (-22, -20),
+    (-50, 8),
+    (10, -18),
+    (25, 20),
+    (46, -12)
+]
+
+
+class Inventory:
+    def __init__(self, wood: int, metal: int, food: int, allegiance: Allegiance):
+        self.wood = wood
+        self.metal = metal
+        self.food = food
+        self.allegiance = allegiance
+
+        self.population = 0
+        self.population_cap = 0
+
+    def update(self, _units: pygame.sprite.Group[units.Unit], _buildings: pygame.sprite.Group[buildings.Building]):
+        pods = 0
+        for building in _buildings:
+            if building.name == "pod" and building.allegiance == self.allegiance:
+                pods += 1
+        self.population_cap = pods * 10
+
+        citizens = 0
+        for unit in _units:
+            if isinstance(unit, units.Unit) and unit.allegiance == self.allegiance:
+                citizens += 1
+        for building in _buildings:
+            for action in building.action_processor.actions:
+                if action.cost[3]:
+                    citizens += 1
+        self.population = citizens
+
+    def add(self, item: str, building_type: str):
+        amount = 1 if building_type == "nexus" else 2
+        if item == "wood":
+            self.wood += amount
+        elif item == "ore":
+            self.metal += amount
+        elif item == "leaves":
+            self.food += amount
+
+    def buy(self, wood: int, metal: int, food: int, is_a_unit: bool) -> bool:
+        unit_check = True if not is_a_unit else self.population < self.population_cap
+        if wood <= self.wood and metal <= self.metal and food < self.food and unit_check:
+            self.wood -= wood
+            self.metal -= metal
+            self.food -= food
+            return True
+        return False
+
+
+class Resource(Entity):
+    max_health = 1
+    shadow_offset = 0
+    
+    def __init__(self, pos: Coords, bottom_offset, *groups):
+        super().__init__(Allegiance.Nature, bottom_offset, *groups)
+        self.pos = pos
+        self.center = isometric.tile_to_world_coords(*pos)
+        self.shadow: pygame.Surface = image.load_image("shadows/shadow1")
+
+    def draw_shadow(self, surface, camera):
+        r = self.rect.move_to(center=isometric.world_to_screen_coords(self.center[0], self.center[1] + self.shadow_offset, camera))
+        surface.blit(self.shadow, r)
+
+
+class Tree(Resource):
+    shadow_offset = -37
+    name = "tree"
+
+    def __init__(self, pos: Coords, *groups):
+        super().__init__(pos, 0, *groups)
+        self.center = isometric.tile_to_world_coords(*pos)
+
+        self.image = self.generate_trees()
+        self.rect = pygame.Rect(0, 0, *self.image.size).move_to(centerx=self.center[0], bottom=self.center[1]+20)
+
+    def generate_trees(self):
+        tree_imgs = [image.load_image("resources/tree1"), image.load_image("resources/tree2")]
+        offsets = random.sample(tree_offsets, random.randint(4, 5))
+        trees: list[tuple[pygame.Rect, int]] = []
+        for x, y in sorted(offsets, key=lambda p: p[1]):
+            rect = pygame.Rect(0, 0, 52, 80).move_to(centerx = x, bottom = y)
+            img = random.randint(0, 1)
+            trees.append((rect, img))
+        r1, *rects = [r for r, _ in trees]
+        totalrect = r1.unionall(rects)
+
+        self.shadow = pygame.Surface(totalrect.size, pygame.SRCALPHA)
+        surface = pygame.Surface(totalrect.size, pygame.SRCALPHA)
+        for rect, img in trees:
+            r = rect.move(-totalrect.left, -totalrect.top)
+            surface.blit(tree_imgs[img], r)
+            self.shadow.blit(image.load_image("shadows/treeshadow"), r)
+
+        return surface
+
+
+class Ore(Resource):
+    shadow_offset = 30
+    name = "ore"
+
+    def __init__(self, pos: Coords, *groups):
+        super().__init__(pos, 0, *groups)
+        self.center = isometric.tile_to_world_coords(*pos)
+
+        self.image = image.load_image("resources/ore")
+        self.rect = pygame.Rect(0, 0, *self.image.size).move_to(centerx=self.center[0], bottom=self.center[1]+20)
+
+
+class Bush(Resource):
+    shadow_offset = 20
+    name = "bush"
+
+    def __init__(self, pos: Coords, *groups):
+        super().__init__(pos, 0, *groups)
+        self.center = isometric.tile_to_world_coords(*pos)
+        self.image = image.load_image("resources/bush")
+        self.rect = pygame.Rect(0, 0, *self.image.size).move_to(centerx=self.center[0], bottom=self.center[1]+20)

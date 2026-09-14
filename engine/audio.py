@@ -63,7 +63,9 @@ class AudioHandler:
         self.sounds[name] = sound
 
     def play_sound(self, name):
-        if name in self.sounds and not self.sfx_muted:
+        if not name in self.sounds:
+            self.load_sound(name)
+        if not self.sfx_muted:
             self.sounds[name].play()
 
     def set_sfx_volume(self, volume):

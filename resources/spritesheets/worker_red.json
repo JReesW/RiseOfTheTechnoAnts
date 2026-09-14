@@ -1,0 +1,35 @@
+{
+	"usesColorKey": false,
+	"colorKey": "purple",
+	"flipAll": true,
+      "sprites": {
+            "WalkX0": [0, 0, 39, 30],
+            "WalkX1": [48, 0, 39, 30],
+            "WalkX2": [96, 0, 39, 30],
+            "WalkY0": [0, 48, 39, 30],
+            "WalkY1": [48, 48, 39, 30],
+            "WalkY2": [96, 48, 39, 30]
+      },
+      "animations": {
+            "IdleX": {
+                  "frames": ["WalkX0"],
+                  "frameDurations": [100],
+                  "loops": false
+            },
+            "IdleY": {
+                  "frames": ["WalkY2"],
+                  "frameDurations": [100],
+                  "loops": false
+            },
+            "WalkX": {
+                  "frames": ["WalkX0", "WalkX1", "WalkX2"],
+                  "frameDurations": [100, 100, 100],
+                  "loops": true
+            },
+            "WalkY": {
+                  "frames": ["WalkY0", "WalkY1", "WalkY2"],
+                  "frameDurations": [100, 100, 100],
+                  "loops": true
+            }
+      }
+}

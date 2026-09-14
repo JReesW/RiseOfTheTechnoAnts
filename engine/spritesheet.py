@@ -4,6 +4,15 @@ import json
 from engine.util import get_path
 
 
+__cache = {}
+
+
+def load_spritesheet(name: str) -> SpriteSheet:
+    if name not in __cache:
+        __cache[name] = SpriteSheet(name)
+    return __cache[name]
+
+
 class SpriteSheet:
     """
     A sprite sheet, consisting of an image and a .json file located in "resources/spritesheets/"
