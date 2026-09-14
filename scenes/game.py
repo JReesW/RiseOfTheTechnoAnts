@@ -158,7 +158,7 @@ class Game(Scene):
                 self.invalid_tiles = buildings.blocked_tiles(walkmap, self.selector, self.ghost_building)
 
         if self.selected_entity is not None:
-            if self.selected_entity.health <= 0:
+            if self.selected_entity.health <= 0 or self.selected_entity.dead:
                 self.selected_entity = None
 
         debug.debug("selected", self.selected_entity.__class__.__name__)
@@ -285,13 +285,16 @@ class Game(Scene):
         if isinstance(self.selected_entity, units.Unit) and self.selected_entity.allegiance == Allegiance.Player:
             x, y, _ = self.marker
             rounded = round(self.selected_entity.pos[0]), round(self.selected_entity.pos[1])
-            path = pathfinding.pathfind(pathfinding.create_walkable_map(terrain, self.buildings, self.selected_entity.blacklist), rounded, isometric.world_to_tile_coords(x, y))
-            if path:
-                path[-1] = isometric.world_to_tile_coords(x, y, True)
-                self.selected_entity.set_targets(path)
+            if isinstance(self.selected_entity, units.Combatant):
                 self.selected_entity.set_task((x, y))
             else:
-                pass  # TODO: PLAY FAIL SOUND EFFECT
+                path = pathfinding.pathfind(pathfinding.create_walkable_map(terrain, self.buildings, self.selected_entity.blacklist), rounded, isometric.world_to_tile_coords(x, y))
+                if path:
+                    path[-1] = isometric.world_to_tile_coords(x, y, True)
+                    self.selected_entity.set_targets(path)
+                    self.selected_entity.set_task((x, y))
+                else:
+                    pass  # TODO: PLAY FAIL SOUND EFFECT
 
     def initiate_construction(self, building: type[buildings.Building]):
         """

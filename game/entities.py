@@ -58,6 +58,7 @@ class Entity(pygame.sprite.Sprite):
         self.bottom_offset = bottom_offset
         self.entity_group: Entities = None
         self.depth = 0
+        self.dead = False
 
     def update(self, dt):
         self.depth = self.rect.bottom - self.bottom_offset
@@ -80,6 +81,7 @@ class Entity(pygame.sprite.Sprite):
     def kill(self, silent: bool = False):
         if not self.is_implosion and not silent:
             self.entity_group.add(Implosion(self.rect, self.image))
+        self.dead = True
         super().kill()
 
 

@@ -4,6 +4,7 @@ from engine import image, spritesheet, animation, debug, director
 from engine.scene import Camera
 from game import isometric, pathfinding
 from game.entities import Entity
+import game.buildings as buildings
 from game.types import *
 
 import enum, math
@@ -174,7 +175,7 @@ class Worker(Unit):
                     # find the closest dropoff building
                     buildings = director.global_data["buildings"]
                     b_filter = ["nexus", "fungusfarm" if item == "leaves" else ("foundry" if item == "ore" else "lumbermill")]
-                    buildings = [b for b in buildings if b.allegiance == Allegiance.Player and b.name in b_filter]
+                    buildings = [b for b in buildings if b.allegiance == self.allegiance and b.name in b_filter]
                     closest_building = min(buildings, key=lambda b: math.dist(self.pos, b.pos) * (3 if b.name == "nexus" else 1))
                     self.task = Dropoff(closest_building, self.task)
                     self.carrying = item
@@ -234,7 +235,75 @@ class Queen(Unit):
                 self.kill(silent=True)
 
 
-class Soldier(Unit):
+class Combatant(Unit):
+    """
+    Any unit that fights
+    """
+    attack_delay = 5
+    damage: int
+
+    def __init__(self, pos, allegiance, *groups):
+        super().__init__(pos, allegiance, *groups)
+        self.delay = 0
+    
+    def set_task(self, pos: Coords):
+        tpos = isometric.world_to_tile_coords(*pos)
+        rounded = lambda p: (int(p[0]), int(p[1]))
+        opponent_buildings = [b for b in director.global_data["buildings"] if b.allegiance != self.allegiance and b.occupies_tile(tpos)]
+        opponent_units = [u for u in director.global_data["units"] if u.allegiance != self.allegiance and rounded(u.pos) == tpos]
+
+        opponent = None
+        if opponent_units:
+            opponent = opponent_units[0]
+        elif opponent_buildings:
+            opponent = opponent_buildings[0]
+
+        if opponent is not None:
+            self.task = Attack(opponent)
+        else:
+            self.task = None
+            path = pathfinding.pathfind(pathfinding.create_walkable_map(director.global_data["terrain"], director.global_data["buildings"], self.blacklist), rounded(self.pos), tpos)
+            if path:
+                path[-1] = isometric.world_to_tile_coords(*pos, True)
+                self.set_targets(path)
+
+    def update_task(self):
+        match self.task:
+            case Attack(target=target):
+                if isinstance(target, Unit):
+                    target_pos = target.pos
+                    target_range = 1
+                elif isinstance(target, buildings.Building):
+                    target_pos = isometric.world_to_tile_coords(*target.get_center(), floating=True)
+                    target_range = target.area / 2
+
+                if math.dist(self.pos, target_pos) <= target_range:
+                    self.state = State.Attacking
+                    if self.delay == 0:
+                        target.hurt(self.damage)
+                        if target.health <= 0:
+                            # find new targets nearby
+                            opponent_buildings = [b for b in director.global_data["buildings"] if b.allegiance != self.allegiance and math.dist(b.pos, self.pos) <= 10]
+                            opponent_units = [u for u in director.global_data["units"] if u.allegiance != self.allegiance and math.dist(u.pos, self.pos) <= 10]
+                            preference = lambda e: 1 if isinstance(e, type(target)) else 0
+                            if opponent_units or opponent_buildings:
+                                new_target = min(opponent_buildings + opponent_units, key=lambda e: (preference(e), math.dist(e.pos, self.pos)))
+                                self.task = Attack(new_target)
+                            else:
+                                self.task = None
+                                self.state = State.Idle
+                    else:
+                        self.delay += 1
+                        if self.delay == 5: self.delay = 0
+                else:
+                    rounded = round(self.pos[0]), round(self.pos[1])
+                    target_pos = int(target_pos[0]), int(target_pos[1])
+                    path = pathfinding.pathfind(pathfinding.create_walkable_map(director.global_data["terrain"], director.global_data["buildings"], self.blacklist, target), rounded, target_pos)
+                    # path = 
+                    self.set_targets(path)
+
+
+class Soldier(Combatant):
     name = "soldier"
     display_name = "Soldier"
     size = 25
@@ -242,9 +311,10 @@ class Soldier(Unit):
     blacklist = [0]
 
     max_health = 40
+    damage = 3
 
 
-class Phrag(Unit):
+class Phrag(Combatant):
     name = "phrag"
     display_name = "Phragmotist"
     size = 25
@@ -252,9 +322,10 @@ class Phrag(Unit):
     blacklist = [0]
 
     max_health = 40
+    damage = 4
 
 
-class Major(Unit):
+class Major(Combatant):
     name = "major"
     display_name = "Major"
     size = 25
@@ -262,9 +333,10 @@ class Major(Unit):
     blacklist = [0, 2, 5, 6]
 
     max_health = 40
+    damage = 18
 
 
-class Alate(Unit):
+class Alate(Combatant):
     name = "alate"
     display_name = "Alate"
     size = 25
@@ -272,3 +344,44 @@ class Alate(Unit):
     blacklist = []
 
     max_health = 40
+    damage = 200
+
+    def set_task(self, pos: Coords):
+        tpos = isometric.world_to_tile_coords(*pos)
+        rounded = lambda p: (int(p[0]), int(p[1]))
+        opponent_buildings = [b for b in director.global_data["buildings"] if b.allegiance != self.allegiance and b.occupies_tile(tpos)]
+
+        opponent = None
+        if opponent_buildings:
+            opponent = opponent_buildings[0]
+
+        if opponent is not None:
+            self.task = Attack(opponent)
+        else:
+            self.task = None
+            path = pathfinding.pathfind(pathfinding.create_walkable_map(director.global_data["terrain"], director.global_data["buildings"], self.blacklist), rounded(self.pos), tpos)
+            if path:
+                path[-1] = isometric.world_to_tile_coords(*pos, True)
+                self.set_targets(path)
+
+    def update_task(self):
+        match self.task:
+            case Attack(target=target):
+                target_pos = isometric.world_to_tile_coords(*target.get_center(), floating=True)
+                target_range = target.area / 2
+
+                if math.dist(self.pos, target_pos) <= target_range:
+                    self.state = State.Attacking
+                    if self.delay == 0:
+                        target.hurt(self.damage)
+                        if target.health <= 0:
+                            self.kill()
+                    else:
+                        self.delay += 1
+                        if self.delay == 5: self.delay = 0
+                else:
+                    rounded = round(self.pos[0]), round(self.pos[1])
+                    target_pos = int(target_pos[0]), int(target_pos[1])
+                    path = pathfinding.pathfind(pathfinding.create_walkable_map(director.global_data["terrain"], director.global_data["buildings"], self.blacklist, target), rounded, target_pos)
+                    # path = 
+                    self.set_targets(path)
