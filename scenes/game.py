@@ -65,7 +65,6 @@ class Game(Scene):
             buildings.Nexus((3, 6), Allegiance.Enemy, self.buildings),
             buildings.Pod((3, 10), Allegiance.Enemy, self.buildings),
             buildings.Farm((3, 14), Allegiance.Enemy, self.buildings),
-            buildings.Tower((7, 10), Allegiance.Enemy, self.buildings),
             units.Worker((21, 22), Allegiance.Player, self.units),
             units.Worker((21, 23), Allegiance.Player, self.units),
             units.Worker((11, 11), Allegiance.Enemy, self.units),

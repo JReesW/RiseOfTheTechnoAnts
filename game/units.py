@@ -307,6 +307,7 @@ class Combatant(Unit):
 
 class Soldier(Combatant):
     name = "soldier"
+    sound = "soldier"
     display_name = "Soldier"
     size = 25
     speed = 0.05
@@ -318,6 +319,7 @@ class Soldier(Combatant):
 
 class Phrag(Combatant):
     name = "phrag"
+    sound = "phrag"
     display_name = "Phragmotist"
     size = 25
     speed = 0.05
@@ -329,6 +331,7 @@ class Phrag(Combatant):
 
 class Major(Combatant):
     name = "major"
+    sound = "major"
     display_name = "Major"
     size = 25
     speed = 0.05
@@ -340,6 +343,7 @@ class Major(Combatant):
 
 class Alate(Combatant):
     name = "alate"
+    sound = "alate"
     display_name = "Alate"
     size = 25
     speed = 0.05

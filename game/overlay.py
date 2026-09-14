@@ -13,7 +13,7 @@ actions_dictionary = {
     "siegery": [actions.CreateMajor, actions.ResearchPropulsion, actions.CreateAlate],
     "foundry": [actions.ResearchCybernetics],
     # units
-    "worker": [actions.BuildPod, actions.BuildFarm, actions.BuildLumbermill, actions.BuildFoundry, actions.BuildBarracks, actions.BuildSiegery, actions.BuildTower],
+    "worker": [actions.BuildPod, actions.BuildFarm, actions.BuildLumbermill, actions.BuildFoundry, actions.BuildBarracks, actions.BuildSiegery],
     "queen": [actions.BuildNexus]
 }
 

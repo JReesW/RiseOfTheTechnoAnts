@@ -146,6 +146,7 @@ class Tower(Building):
 
 class Farm(Building):
     name = "fungusfarm"
+    sound = "fungusfarm"
     display_name = "Fungus Farm"
     bottom_offset = 84
     area = Area.ThreeByThree
@@ -153,6 +154,7 @@ class Farm(Building):
 
 class Lumbermill(Building):
     name = "lumbermill"
+    sound = "lumbermill"
     display_name = "Lumbermill"
     bottom_offset = 94
     area = Area.ThreeByThree
@@ -178,6 +180,7 @@ class Foundry(Building):
 
 class Barracks(Building):
     name = "barracks"
+    sound = "barracks"
     display_name = "Barracks"
     bottom_offset = 104
     area = Area.ThreeByThree
@@ -185,6 +188,7 @@ class Barracks(Building):
 
 class Siegery(Building):
     name = "siegery"
+    sound = "siegery"
     display_name = "Siegery"
     bottom_offset = 84
     area = Area.ThreeByThree
