@@ -1,26 +1,19 @@
 import sys
-from pathlib import Path
 import pygame
 import pygame.freetype
 
-from engine import debug, director, mouse
-from engine.util import get_path
+from engine import debug, director
+from settings import *
 
 pygame.init()
 pygame.freetype.init()
 
 
-display_info = pygame.display.Info()
-
-SCREEN_SIZE = SCREEN_WIDTH, SCREEN_HEIGHT = (1920, 1080)
-SCALED_SIZE = SCALED_WIDTH, SCALED_HEIGHT = (display_info.current_w, display_info.current_h)
-SCALED_SIZE = SCREEN_SIZE # CHANGE BACKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK
-SCALE = pygame.Vector2(SCALED_WIDTH / SCREEN_WIDTH, SCALED_HEIGHT / SCREEN_HEIGHT)
-
 screen = pygame.display.set_mode(
-    SCALED_SIZE
-) # re-add pygame.FULLSCREEN
-pygame.display.set_caption("Pygame project")
+    SCREEN_SIZE,
+    pygame.FULLSCREEN | pygame.SCALED
+)
+pygame.display.set_caption("Rise of the Techno-Ants")
 
 
 FPS = 60
@@ -58,7 +51,7 @@ while running:
     if debug.is_active():
         debug.render(surface)
 
-    screen.blit(pygame.transform.scale(surface, SCALED_SIZE), (0, 0))
+    screen.blit(surface, (0, 0))
 
     # Draw the surface to the screen
     pygame.display.flip()

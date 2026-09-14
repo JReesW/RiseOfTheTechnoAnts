@@ -1,0 +1,25 @@
+{
+	"usesColorKey": false,
+	"colorKey": "purple",
+	"flipAll": true,
+      "sprites": {
+            "tower1": [0, 0, 191, 329],
+            "tower2": [191, 0, 191, 329],
+            "tower3": [382, 0, 191, 329],
+            "tower_red1": [0, 329, 191, 329],
+            "tower_red2": [191, 329, 191, 329],
+            "tower_red3": [382, 329, 191, 329]
+      },
+      "animations": {
+            "tower": {
+                  "frames": ["tower1", "tower2", "tower3", "tower2"],
+                  "frameDurations": [300, 300, 300, 300],
+                  "loops": true
+            },
+            "tower_red": {
+                  "frames": ["tower_red1", "tower_red2", "tower_red3", "tower_red2"],
+                  "frameDurations": [300, 300, 300, 300],
+                  "loops": true
+            }
+      }
+}
