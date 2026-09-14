@@ -11,6 +11,7 @@ actions_dictionary = {
     "nexus": [actions.CreateWorker, actions.CreateQueen, actions.ResearchArrhenotoky],
     "barracks": [actions.CreateSoldier, actions.CreatePhrag],
     "siegery": [actions.CreateAlate, actions.CreateMajor],
+    "foundry": [actions.ResearchCybernetics],
     # units
     "worker": [actions.BuildPod, actions.BuildFarm, actions.BuildLumbermill, actions.BuildFoundry, actions.BuildBarracks, actions.BuildSiegery, actions.BuildTower],
     "queen": [actions.BuildNexus]
@@ -108,13 +109,13 @@ class Overlay:
             return True
         elif self.selected_entity is not None and self.actions_menu_rect.collidepoint(mouse):
             if self.selected_entity.name in actions_dictionary:  # TODO: is name in dictionary check necessary at the end?
-                for n, action in enumerate(action for action in actions_dictionary[self.selected_entity.name] if action.available):
+                for n, action in enumerate(action for action in actions_dictionary[self.selected_entity.name] if action.available and actions.flags[action.required]):
                     if self.actions_rects[n].collidepoint(mouse):
                         for event in events:
                             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                                if action.time == 0:
+                                if action.time == 0 and self.inventory.buy(*action.cost):
                                     action.onclick()
-                                elif isinstance(self.selected_entity, buildings.Building):
+                                elif isinstance(self.selected_entity, buildings.Building) and len(self.selected_entity.action_processor.actions) < 5 and self.inventory.buy(*action.cost):
                                     self.selected_entity.action_processor.add(action())
                         if action.name in self.tooltips:
                             self.current_tooltip = action.name
@@ -178,7 +179,7 @@ class Overlay:
             surface.blit(self.actions_menu, self.actions_menu_rect)
 
             if self.selected_entity.name in actions_dictionary:
-                for n, action in enumerate(action for action in actions_dictionary[self.selected_entity.name] if action.available):
+                for n, action in enumerate(action for action in actions_dictionary[self.selected_entity.name] if action.available and actions.flags[action.required]):
                     img = image.load_image(f"actions/{action.name}")
                     surface.blit(img, self.actions_rects[n])
             surface.blit(self.selected_label, self.selected_label.get_rect(bottomleft=self.actions_menu_rect.topleft))
@@ -216,6 +217,7 @@ class Overlay:
         self.tooltips["major"] = (costly_tooltip("Major", (100, 50, 30), "Large, technologically enhanced soldier. Has trouble walking through forests"), True)
 
         self.tooltips["arrhenotoky"] = (costly_tooltip("Arrhenotoky (Research)", (100, 50, 30), "Unlocks the creation of queens"), True)
+        self.tooltips["cybernetics"] = (costly_tooltip("Cybernetics (Research)", (100, 50, 30), "Unlocks the creation of the siegery"), True)
 
 
 def simple_tooltip(txt: str) -> pygame.Surface:

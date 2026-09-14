@@ -68,10 +68,6 @@ class Game(Scene):
             buildings.Tower((7, 10), Allegiance.Enemy, self.buildings),
             units.Worker((21, 22), Allegiance.Player, self.units),
             units.Worker((21, 23), Allegiance.Player, self.units),
-            units.Worker((21, 24), Allegiance.Player, self.units),
-            units.Worker((22, 22), Allegiance.Player, self.units),
-            units.Worker((22, 23), Allegiance.Player, self.units),
-            units.Worker((22, 24), Allegiance.Player, self.units),
             units.Worker((11, 11), Allegiance.Enemy, self.units),
             units.Queen((13, 13), Allegiance.Player, self.units),
             units.Queen((14, 14), Allegiance.Enemy, self.units),
@@ -112,6 +108,9 @@ class Game(Scene):
                 if event.key == pygame.K_h:
                     if self.selected_entity is not None:
                         self.selected_entity.health -= 5
+                if event.key == pygame.K_k:
+                    if self.selected_entity is not None:
+                        self.selected_entity.kill()
             if event.type == pygame.MOUSEBUTTONUP and not overlay_usurped:
                 if event.button == 1:
                     if self.cursor_state == CursorState.Select:

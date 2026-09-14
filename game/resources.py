@@ -35,11 +35,15 @@ class Inventory:
                 pods += 1
         self.population_cap = pods * 10
 
-        workers = 0
+        citizens = 0
         for unit in _units:
-            if unit.name == "worker" and unit.allegiance == self.allegiance:
-                workers += 1
-        self.population = workers
+            if isinstance(unit, units.Unit) and unit.allegiance == self.allegiance:
+                citizens += 1
+        for building in _buildings:
+            for action in building.action_processor.actions:
+                if action.cost[3]:
+                    citizens += 1
+        self.population = citizens
 
     def add(self, item: str, building_type: str):
         amount = 1 if building_type == "nexus" else 2
@@ -49,6 +53,15 @@ class Inventory:
             self.metal += amount
         elif item == "leaves":
             self.food += amount
+
+    def buy(self, wood: int, metal: int, food: int, is_a_unit: bool) -> bool:
+        unit_check = True if not is_a_unit else self.population < self.population_cap
+        if wood <= self.wood and metal <= self.metal and food < self.food and unit_check:
+            self.wood -= wood
+            self.metal -= metal
+            self.food -= food
+            return True
+        return False
 
 
 class Resource(Entity):
