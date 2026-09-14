@@ -1,6 +1,6 @@
 import pygame
 
-from engine import image, spritesheet, animation, debug, director
+from engine import image, spritesheet, animation, director
 from engine.scene import Camera
 from game import isometric, pathfinding
 from game.entities import Entity

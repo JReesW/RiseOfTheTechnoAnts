@@ -2,7 +2,7 @@ import pygame
 import pygame.freetype
 import sys
 from engine.scene import Scene
-from engine import colors, image, mouse, debug, audio, director
+from engine import colors, image, director
 
 class MainMenu(Scene):
     def __init__(self, *args, **kwargs):

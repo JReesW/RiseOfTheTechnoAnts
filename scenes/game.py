@@ -3,7 +3,7 @@ from engine.scene import Scene, Camera
 from engine import colors, image, debug, audio, director
 from settings import SCREEN_SIZE, SCREEN_HEIGHT, SCREEN_WIDTH
 
-from game import isometric, maps, entities, buildings, resources, units, pathfinding, overlay, actions
+from game import isometric, maps, entities, buildings, resources, units, pathfinding, overlay, actions, terrain as terrain_generation
 from game.types import *
 
 import random, math, enum
@@ -19,18 +19,13 @@ class CursorState(enum.Enum):
     Build = 1
 
 
-terrain = []
-with open("resources/output.txt", 'r') as file:
-    for line in file.readlines():
-        terrain.append([int(c) for c in line.strip()])
-
-
 tracks = ["swarmin", "warmins", "minswar"]
 
 
 class Game(Scene):
     def __init__(self):
-        isometric.initialize_isometry(len(terrain), 160, 84)
+        self.terrain = terrain_generation.create_terrain(100, 100, int(random.random() * 2048))
+        isometric.initialize_isometry(len(self.terrain), 160, 84)
         self.initialize_actions()
 
         self.audio = audio.AudioHandler()
@@ -50,10 +45,11 @@ class Game(Scene):
         self.ghost_building = None
         self.invalid_tiles = []
 
-        self.map = maps.generate_map(terrain)
+        self.map = maps.generate_map(self.terrain)
 
         map_w, map_h = isometric.get_world_size()
         self.camera = Camera((7040, 0), screen_size=SCREEN_SIZE, x_bounds=(-540, map_w - SCREEN_WIDTH + 540), y_bounds=(-540, map_h - SCREEN_HEIGHT + 540))
+        self.camera.set_center(isometric.tile_to_world_coords(88, 86))
         self.cam_speed = 10
 
         self.buildings: pygame.sprite.Group[buildings.Building] = pygame.sprite.Group()
@@ -62,35 +58,27 @@ class Game(Scene):
         self.entities = entities.Entities(self.camera)
         self.populate_map()
         self.entities.add(
-            buildings.Nexus((6, 3), Allegiance.Player, self.buildings),
-            buildings.Pod((10, 3), Allegiance.Player, self.buildings),
-            buildings.Farm((14, 3), Allegiance.Player, self.buildings),
-            buildings.Nexus((3, 6), Allegiance.Enemy, self.buildings),
-            buildings.Pod((3, 10), Allegiance.Enemy, self.buildings),
-            buildings.Farm((3, 14), Allegiance.Enemy, self.buildings),
-            units.Worker((21, 22), Allegiance.Player, self.units),
-            units.Worker((21, 23), Allegiance.Player, self.units),
-            units.Worker((11, 11), Allegiance.Enemy, self.units),
-            units.Queen((13, 13), Allegiance.Player, self.units),
-            units.Queen((14, 14), Allegiance.Enemy, self.units),
-            units.Soldier((15, 15), Allegiance.Player, self.units),
-            units.Soldier((16, 16), Allegiance.Enemy, self.units),
-            units.Phrag((15, 13), Allegiance.Player, self.units),
-            units.Phrag((16, 14), Allegiance.Enemy, self.units),
-            units.Major((15, 11), Allegiance.Player, self.units),
-            units.Major((16, 12), Allegiance.Enemy, self.units),
-            units.Alate((15, 9), Allegiance.Player, self.units),
-            units.Alate((16, 10), Allegiance.Enemy, self.units)
+            # blue starting
+            buildings.Nexus((88, 86), Allegiance.Player, self.buildings),
+            buildings.Pod((89, 84), Allegiance.Player, self.buildings),
+            units.Worker((85, 87), Allegiance.Player, self.units),
+            units.Worker((87, 89), Allegiance.Player, self.units),
+
+            # red starting
+            buildings.Nexus((11, 12), Allegiance.Enemy, self.buildings),
+            buildings.Pod((12, 10), Allegiance.Enemy, self.buildings),
+            units.Worker((8, 13), Allegiance.Enemy, self.units),
+            units.Worker((10, 15), Allegiance.Enemy, self.units),
         )
         self.selected_entity = None
         director.global_data["entities"] = self.entities
         director.global_data["buildings"] = self.buildings
         director.global_data["units"] = self.units
-        director.global_data["terrain"] = terrain
+        director.global_data["terrain"] = self.terrain
 
         self.inventory = resources.Inventory(500, 500, 500, Allegiance.Player)
         self.enemy_inventory = resources.Inventory(50, 50, 50, Allegiance.Enemy)
-        self.overlay = overlay.Overlay(terrain, self.camera, self.inventory)
+        self.overlay = overlay.Overlay(self.terrain, self.camera, self.inventory)
         director.global_data["player_inventory"] = self.inventory
         director.global_data["enemy_inventory"] = self.enemy_inventory
 
@@ -138,7 +126,7 @@ class Game(Scene):
 
         self.selector_prev = self.selector
         self.selector = isometric.screen_to_tile_coords(*mouse, self.camera)
-        if self.selector[0] < 0 or self.selector[0] >= len(terrain[0]) or self.selector[1] < 0 or self.selector[1] >= len(terrain) or overlay_usurped:
+        if self.selector[0] < 0 or self.selector[0] >= len(self.terrain[0]) or self.selector[1] < 0 or self.selector[1] >= len(self.terrain) or overlay_usurped:
             self.selector = None
         debug.debug("selector", self.selector)
         if self.selected_entity is not None:
@@ -158,7 +146,7 @@ class Game(Scene):
 
         if self.cursor_state == CursorState.Build:
             if self.selector != self.selector_prev and self.selector != None:
-                walkmap = pathfinding.create_walkable_map(terrain, self.buildings, buildings.Building.blacklist)
+                walkmap = pathfinding.create_walkable_map(self.terrain, self.buildings, buildings.Building.blacklist)
                 self.invalid_tiles = buildings.blocked_tiles(walkmap, self.selector, self.ghost_building)
 
         if self.selected_entity is not None:
@@ -282,7 +270,7 @@ class Game(Scene):
         """
         Add the resource entities to the world
         """
-        for y, row in enumerate(terrain):
+        for y, row in enumerate(self.terrain):
             for x , cell in enumerate(row):
                 if cell == 2:
                     self.entities.add(resources.Tree((x, y), self.resources))
@@ -301,7 +289,7 @@ class Game(Scene):
             if isinstance(self.selected_entity, units.Combatant):
                 self.selected_entity.set_task((x, y))
             else:
-                path = pathfinding.pathfind(pathfinding.create_walkable_map(terrain, self.buildings, self.selected_entity.blacklist), rounded, isometric.world_to_tile_coords(x, y))
+                path = pathfinding.pathfind(pathfinding.create_walkable_map(self.terrain, self.buildings, self.selected_entity.blacklist), rounded, isometric.world_to_tile_coords(x, y))
                 if path:
                     path[-1] = isometric.world_to_tile_coords(x, y, True)
                     self.selected_entity.set_targets(path)
@@ -315,7 +303,7 @@ class Game(Scene):
         """
         self.cursor_state = CursorState.Build
         self.ghost_building = building
-        walkmap = pathfinding.create_walkable_map(terrain, self.buildings, buildings.Building.blacklist)
+        walkmap = pathfinding.create_walkable_map(self.terrain, self.buildings, buildings.Building.blacklist)
         selector = (0, 0) if self.selector is None else self.selector
         self.invalid_tiles = buildings.blocked_tiles(walkmap, selector, self.ghost_building)
 
@@ -326,7 +314,7 @@ class Game(Scene):
         if len(self.invalid_tiles) == 0:
             rounded = round(self.selected_entity.pos[0]), round(self.selected_entity.pos[1])
             self.selected_entity.task = units.Build(self.ghost_building, self.selector, Allegiance.Player, rounded)
-            path = pathfinding.pathfind(pathfinding.create_walkable_map(terrain, self.buildings, self.selected_entity.blacklist), rounded, self.selector)
+            path = pathfinding.pathfind(pathfinding.create_walkable_map(self.terrain, self.buildings, self.selected_entity.blacklist), rounded, self.selector)
             self.selected_entity.set_targets(path)
 
             self.cursor_state = CursorState.Select

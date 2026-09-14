@@ -1,6 +1,6 @@
 import pygame
 from engine.scene import Scene
-from engine import colors, image, mouse, debug, audio, director
+from engine import image, audio, director
 from game import saveSystem
 
 class Startup(Scene):
@@ -31,9 +31,6 @@ class Startup(Scene):
         if self.time > 4:
             director.change_scene("Fade", self, "MainMenu")
 
-        debug.debug("time", self.time)
-        debug.debug("state", self.state)
-
     def render(self, surface):
         surface.fill((27, 12, 31))
 
@@ -41,8 +38,6 @@ class Startup(Scene):
             logo = self.logo.copy()
 
             progress = self.time / 2
-
-            debug.debug("progress", progress)
 
             logo.set_alpha(int(progress * 255))
             # logo.fill(colors.white, special_flags=pygame.BLEND_RGB_ADD)

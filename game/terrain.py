@@ -93,7 +93,7 @@ def create_terrain(width: int, height: int, seed: int):
 
     print(f"biome grid made: {time.perf_counter() - start}")
 
-    return Terrain(grid)
+    return grid
 
 class Terrain():
     def __init__(self, grid: list[list[int]]):

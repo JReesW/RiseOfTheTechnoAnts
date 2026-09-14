@@ -37,7 +37,7 @@ class Pause(Scene):
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:
                     if self.button_rect.collidepoint(mouse):
-                        director.quit()
+                        director.change_scene("MainMenu")
 
         self.hovering = self.button_rect.collidepoint(mouse)
 

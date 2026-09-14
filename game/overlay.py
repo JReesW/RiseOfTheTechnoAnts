@@ -164,7 +164,7 @@ class Overlay:
         surface.blit(surf, rect)
 
         # actions processor
-        if self.selected_entity is not None and self.selected_entity.name in needs_processor:
+        if self.selected_entity is not None and self.selected_entity.name in needs_processor and self.selected_entity.allegiance == Allegiance.Player:
             surface.blit(self.actions_processor, self.actions_processor_rect)
             for n, action in enumerate(self.selected_entity.action_processor.actions):
                 img = image.load_image(f"actions/{action.name}")
