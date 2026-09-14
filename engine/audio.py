@@ -44,6 +44,9 @@ class AudioHandler:
     def resume_music(self):
         pygame.mixer.music.unpause()
 
+    def busy(self) -> bool:
+        return pygame.mixer.music.get_busy()
+
     def set_music_volume(self, volume):
         """Volume range: 0.0 - 1.0"""
         self.music_volume = max(0.0, min(1.0, volume))

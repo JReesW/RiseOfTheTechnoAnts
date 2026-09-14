@@ -25,6 +25,9 @@ with open("resources/output.txt", 'r') as file:
         terrain.append([int(c) for c in line.strip()])
 
 
+tracks = ["swarmin", "warmins", "minswar"]
+
+
 class Game(Scene):
     def __init__(self):
         isometric.initialize_isometry(len(terrain), 160, 84)
@@ -90,6 +93,9 @@ class Game(Scene):
         self.overlay = overlay.Overlay(terrain, self.camera, self.inventory)
         director.global_data["player_inventory"] = self.inventory
         director.global_data["enemy_inventory"] = self.enemy_inventory
+
+        self.music_track = 0
+        director.audio.play_music(tracks[self.music_track], 0)
     
     def handle_events(self, events):
         mouse = pygame.mouse.get_pos()
@@ -158,6 +164,10 @@ class Game(Scene):
         if self.selected_entity is not None:
             if self.selected_entity.health <= 0 or self.selected_entity.dead:
                 self.selected_entity = None
+
+        if not director.audio.busy():
+            self.music_track = (self.music_track + 1) % 3
+            director.audio.play_music(tracks[self.music_track], 0)
 
         debug.debug("selected", self.selected_entity.__class__.__name__)
 
