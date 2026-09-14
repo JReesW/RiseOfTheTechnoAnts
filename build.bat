@@ -1,0 +1,1 @@
+pyinstaller --onefile --add-data "resources;resources" --clean --name "Rise of the Techno-Ants" --icon=resources/images/solo_avatar_inverted.ico main.py

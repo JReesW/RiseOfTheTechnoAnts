@@ -6,6 +6,7 @@ from scenes.settings import Settings
 from scenes.pause import Pause
 from scenes.loading import Loading
 from scenes.credits import Credits
+from scenes.howtoplay import HowToPlay
 
 
 scenes = [
@@ -16,5 +17,6 @@ scenes = [
     Settings,
     Pause,
     Loading,
-    Credits
+    Credits,
+    HowToPlay
 ]

@@ -42,7 +42,7 @@ class MainMenu(Scene):
                 for button in self.buttons:
                     if button.collidepoint(self.mouse):
                         if button == self.startButton:
-                            director.change_scene("Loading")
+                            director.change_scene("HowToPlay")
                         elif button == self.settingsButton:
                             director.change_scene("Settings")
                         elif button == self.creditsButton:

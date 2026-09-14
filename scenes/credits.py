@@ -2,7 +2,6 @@ import pygame
 import pygame.freetype
 from engine.scene import Scene
 from engine import colors, director, image, text
-from game import saveSystem
 
 class Credits(Scene):
     def __init__(self, *args, **kwargs):
@@ -37,6 +36,8 @@ class Credits(Scene):
         self.rds_ds, self.rds_dr = text.render("Additional programming", colors.white, "Arial", 40)
         self.rds_dr.topright = self.rds_r.right, self.rds_r.bottom + 10
 
+        director.audio.play_music("goodbye")
+
     def is_in_rect(self, rect : pygame.Rect, pos):
         return (rect.x + rect.w > pos[0]) and (rect.x < pos[0]) and (rect.y + rect.h > pos[1]) and (rect.y < pos[1])
     
@@ -45,11 +46,11 @@ class Credits(Scene):
         for event in events:
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if self.backRect.collidepoint(self.mouse):
-                    director.change_scene("MainMenu", keep_music=True)
+                    director.change_scene("MainMenu")
 
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
-                    director.change_scene("MainMenu", keep_music=True)
+                    director.change_scene("MainMenu")
     
     def update(self, dt):
         pass
