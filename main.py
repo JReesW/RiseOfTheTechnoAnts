@@ -21,7 +21,7 @@ clock = pygame.time.Clock()
 running = True
 
 director.find_scenes()
-director.change_scene("Game")
+director.change_scene("Startup")
 director._set_scene()
 
 surface = pygame.Surface(SCREEN_SIZE, pygame.SRCALPHA)
