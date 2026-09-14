@@ -11,6 +11,7 @@ scene: Scene = None
 next_scene: Scene = None
 audio: AudioHandler = AudioHandler()
 level_select = None
+global_data = {}
 
 
 def change_scene(_scene: str, *args, **kwargs) -> None:
@@ -25,6 +26,13 @@ def _set_scene() -> None:
     global scene, next_scene
     scene = next_scene
     next_scene = None
+
+
+def get_scene(_scene: str) -> Scene:
+    """
+    Get the scene class by its name
+    """
+    return __scenes[_scene]
 
 
 def find_scenes(path: str = "scenes") -> None:

@@ -1,0 +1,51 @@
+{
+	"usesColorKey": false,
+	"colorKey": "purple",
+	"flipAll": true,
+      "sprites": {
+            "WalkX0": [0, 0, 36, 27],
+            "WalkX1": [48, 0, 36, 27],
+            "WalkX2": [96, 0, 36, 27],
+            "WalkY0": [0, 48, 36, 27],
+            "WalkY1": [48, 48, 36, 27],
+            "WalkY2": [96, 48, 36, 27],
+            "AttackX0": [0, 96, 36, 27],
+            "AttackX1": [48, 96, 36, 27],
+            "AttackX2": [96, 96, 36, 27],
+            "AttackY0": [0, 144, 36, 27],
+            "AttackY1": [48, 144, 36, 27],
+            "AttackY2": [96, 144, 36, 27]
+      },
+      "animations": {
+            "IdleX": {
+                  "frames": ["WalkX0"],
+                  "frameDurations": [100],
+                  "loops": false
+            },
+            "IdleY": {
+                  "frames": ["WalkY2"],
+                  "frameDurations": [100],
+                  "loops": false
+            },
+            "WalkX": {
+                  "frames": ["WalkX0", "WalkX1", "WalkX2"],
+                  "frameDurations": [100, 100, 100],
+                  "loops": true
+            },
+            "WalkY": {
+                  "frames": ["WalkY0", "WalkY1", "WalkY2"],
+                  "frameDurations": [100, 100, 100],
+                  "loops": true
+            },
+            "AttackX": {
+                  "frames": ["AttackX0", "AttackX1", "AttackX2"],
+                  "frameDurations": [100, 100, 100],
+                  "loops": true
+            },
+            "AttackY": {
+                  "frames": ["AttackY0", "AttackY1", "AttackY2"],
+                  "frameDurations": [100, 100, 100],
+                  "loops": true
+            }
+      }
+}
