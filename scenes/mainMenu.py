@@ -7,8 +7,9 @@ from engine import colors, image, mouse, debug, audio, director
 class MainMenu(Scene):
     def __init__(self, *args, **kwargs):
         self.logo = image.load_image("teamlogo").convert_alpha()
-
-        self.audio_handler = audio.AudioHandler()
+        self.background = image.load_image("mainmenu")
+        self.title = pygame.transform.scale_by(image.load_image("title"), 2)
+        self.title_rect = pygame.Rect(0, 0, *self.title.size).move_to(centerx=960, top=150)
 
         self.buttons: list[pygame.Rect] = []
         centerx = 1920/2
@@ -30,16 +31,18 @@ class MainMenu(Scene):
         self.buttons.append(self.quitButton)
 
         self.mouse = (0,0)
+
+        if "keep_music" not in kwargs:
+            director.audio.play_music("antlers")
     
     def handle_events(self, events):
         self.mouse = pygame.mouse.get_pos()
         for event in events:
             if event.type == pygame.MOUSEBUTTONDOWN:
                 for button in self.buttons:
-                    if self.is_in_rect(button, self.mouse):
+                    if button.collidepoint(self.mouse):
                         if button == self.startButton:
-                            pass
-                            #director.change_scene("Game")
+                            director.change_scene("Loading")
                         elif button == self.settingsButton:
                             director.change_scene("Settings")
                         elif button == self.creditsButton:
@@ -56,11 +59,13 @@ class MainMenu(Scene):
 
     def render(self, surface):
         surface.fill((27, 12, 31))
+        surface.blit(self.background)
+        surface.blit(self.title, self.title_rect)
 
         #pygame.draw.rect(surface, colors.red, self.logoRect)
         
         for button in self.buttons:
-            hovered = self.is_in_rect(button, self.mouse)
+            hovered = button.collidepoint(self.mouse)
 
             if hovered:
                 outline = pygame.Surface((button.width + 6, button.height + 6))

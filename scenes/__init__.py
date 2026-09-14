@@ -4,6 +4,8 @@ from scenes.fade import Fade
 from scenes.mainMenu import MainMenu
 from scenes.settings import Settings
 from scenes.pause import Pause
+from scenes.loading import Loading
+from scenes.credits import Credits
 
 
 scenes = [
@@ -12,5 +14,7 @@ scenes = [
     Fade,
     MainMenu,
     Settings,
-    Pause
+    Pause,
+    Loading,
+    Credits
 ]

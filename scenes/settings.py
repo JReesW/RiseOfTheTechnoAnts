@@ -1,7 +1,7 @@
 import pygame
 import pygame.freetype
 from engine.scene import Scene
-from engine import colors, director, mouse
+from engine import colors, director, image
 from game import saveSystem
 
 class Settings(Scene):
@@ -10,6 +10,8 @@ class Settings(Scene):
         saveSystem.load_save_data()
 
         centerx = 1920/2
+
+        self.background = image.load_image("mainmenu")
 
         self.soundRect = pygame.Rect(100, 100, 500, 100)
         self.soundRect.centerx = centerx
@@ -46,7 +48,7 @@ class Settings(Scene):
         self.musicVolume = saveSystem.saveData["musicVolume"]
 
     def handle_events(self, events):
-        self.mouse = mouse.mousepos()
+        self.mouse = pygame.mouse.get_pos()
         for event in events:
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if self.is_in_rect(self.soundRect, self.mouse) and abs(self.mouse[1] - self.soundRect.centery) < 5:
@@ -55,7 +57,7 @@ class Settings(Scene):
                 if self.is_in_rect(self.musicRect, self.mouse) and abs(self.mouse[1] - self.musicRect.centery) < 5:
                     self.editingMusic = True
                     self.updateMusicVolume()
-                if self.is_in_rect(self.backRect, self.mouse):
+                if self.backRect.collidepoint(self.mouse):
                     director.change_scene("MainMenu", keep_music=True)
 
             elif event.type == pygame.MOUSEBUTTONUP:
@@ -75,6 +77,7 @@ class Settings(Scene):
     
     def render(self, surface):
         surface.fill((27, 12, 31))
+        surface.blit(self.background)
 
         font = pygame.freetype.SysFont("Arial", 26)
 
@@ -142,7 +145,7 @@ class Settings(Scene):
         surface.blit(musicVolumeTextSurface, musicVolumeTextRect)
 
         #back button
-        hovered = self.is_in_rect(self.backRect, self.mouse)
+        hovered = self.backRect.collidepoint(self.mouse)
         
         if hovered:
             outline = pygame.Surface((self.backRect.width + 6, self.backRect.height + 6))
