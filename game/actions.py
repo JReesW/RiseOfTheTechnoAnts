@@ -62,37 +62,37 @@ class BuildPod(Action):
 
 class BuildBarracks(Action):
     name = "barracks"
-    cost = (1, 2, 3, False)
+    cost = (150, 200, 50, False)
     time = 0
 
 
 class BuildFoundry(Action):
     name = "foundry"
-    cost = (1, 2, 3, False)
+    cost = (100, 50, 0, False)
     time = 0
 
 
 class BuildFarm(Action):
     name = "fungusfarm"
-    cost = (1, 2, 3, False)
+    cost = (100, 50, 0, False)
     time = 0
 
 
 class BuildLumbermill(Action):
     name = "lumbermill"
-    cost = (1, 2, 3, False)
+    cost = (20, 50, 0, False)
     time = 0
 
 
 class BuildNexus(Action):
     name = "nexus"
-    cost = (1, 2, 3, False)
+    cost = (0, 0, 0, False)
     time = 0
 
 
 class BuildSiegery(Action):
     name = "siegery"
-    cost = (1, 2, 3, False)
+    cost = (200, 500, 100, False)
     time = 0
     required = "can_build_siegery"
 
@@ -110,40 +110,40 @@ class BuildTower(Action):
 
 class CreateWorker(Action):
     name = "worker"
-    cost = (0, 0, 2, True)
-    time = 120
+    cost = (0, 0, 30, True)
+    time = 240
 
 
 class CreateQueen(Action):
     name = "queen"
-    cost = (0, 0, 2, True)
-    time = 300
+    cost = (250, 250, 500, True)
+    time = 600
     required = "can_make_queens"
 
 
 class CreateSoldier(Action):
     name = "soldier"
-    cost = (0, 0, 2, True)
-    time = 150
+    cost = (0, 10, 40, True)
+    time = 300
 
 
 class CreatePhrag(Action):
     name = "phrag"
-    cost = (0, 0, 2, True)
-    time = 180
+    cost = (0, 30, 50, True)
+    time = 400
 
 
 class CreateAlate(Action):
     name = "alate"
-    cost = (0, 0, 2, True)
-    time = 240
+    cost = (0, 300, 50, True)
+    time = 480
     required = "can_make_alate"
 
 
 class CreateMajor(Action):
     name = "major"
-    cost = (0, 0, 2, True)
-    time = 270
+    cost = (0, 100, 75, True)
+    time = 480
 
 
 ############
@@ -159,7 +159,7 @@ class Upgrade(Action):
 
 class ResearchArrhenotoky(Upgrade):
     name = "arrhenotoky"
-    cost = (1, 2, 3, False)
+    cost = (100, 100, 300, False)
     time = 600
 
     def onfinish(self):
@@ -168,7 +168,7 @@ class ResearchArrhenotoky(Upgrade):
 
 class ResearchCybernetics(Upgrade):
     name = "cybernetics"
-    cost = (1, 2, 3, False)
+    cost = (200, 300, 50, False)
     time = 600
 
     def onfinish(self):
@@ -177,7 +177,7 @@ class ResearchCybernetics(Upgrade):
 
 class ResearchPropulsion(Upgrade):
     name = "propulsion"
-    cost = (1, 2, 3, False)
+    cost = (200, 400, 100, False)
     time = 600
 
     def onfinish(self):

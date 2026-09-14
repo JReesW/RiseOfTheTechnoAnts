@@ -157,7 +157,7 @@ class Worker(Unit):
     speed = 0.03
     blacklist = [0]
 
-    max_health = 20
+    max_health = 15
 
     def set_task(self, pos: Coords):
         terrain = director.global_data["terrain"]
@@ -217,7 +217,7 @@ class Queen(Unit):
     speed = 0.02
     blacklist = [0]
 
-    max_health = 15
+    max_health = 10
 
     def set_task(self, pos: Coords):
         self.task = None
@@ -310,11 +310,11 @@ class Soldier(Combatant):
     sound = "soldier"
     display_name = "Soldier"
     size = 25
-    speed = 0.05
+    speed = 0.03
     blacklist = [0]
 
     max_health = 40
-    damage = 3
+    damage = 2
 
 
 class Phrag(Combatant):
@@ -322,11 +322,11 @@ class Phrag(Combatant):
     sound = "phrag"
     display_name = "Phragmotist"
     size = 25
-    speed = 0.05
+    speed = 0.03
     blacklist = [0]
 
-    max_health = 40
-    damage = 4
+    max_health = 120
+    damage = 3
 
 
 class Major(Combatant):
@@ -334,11 +334,11 @@ class Major(Combatant):
     sound = "major"
     display_name = "Major"
     size = 25
-    speed = 0.05
+    speed = 0.025
     blacklist = [0, 2, 5, 6]
 
-    max_health = 40
-    damage = 18
+    max_health = 100
+    damage = 15
 
 
 class Alate(Combatant):
@@ -349,7 +349,7 @@ class Alate(Combatant):
     speed = 0.05
     blacklist = []
 
-    max_health = 40
+    max_health = 50
     damage = 200
 
     def set_task(self, pos: Coords):

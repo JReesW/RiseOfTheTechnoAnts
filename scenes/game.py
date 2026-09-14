@@ -76,8 +76,8 @@ class Game(Scene):
         director.global_data["units"] = self.units
         director.global_data["terrain"] = self.terrain
 
-        self.inventory = resources.Inventory(500, 500, 500, Allegiance.Player)
-        self.enemy_inventory = resources.Inventory(50, 50, 50, Allegiance.Enemy)
+        self.inventory = resources.Inventory(100, 100, 100, Allegiance.Player)
+        self.enemy_inventory = resources.Inventory(100, 100, 100, Allegiance.Enemy)
         self.overlay = overlay.Overlay(self.terrain, self.camera, self.inventory)
         director.global_data["player_inventory"] = self.inventory
         director.global_data["enemy_inventory"] = self.enemy_inventory

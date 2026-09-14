@@ -97,7 +97,7 @@ class Implosion(Entity):
         self.width = rect.width
         self.blast_point = 30
         self.total_time = 90
-        self.building_image = img
+        self.building_image = img.copy()
         self.image = pygame.Surface((self.width * 2, self.width * 2), pygame.SRCALPHA)
         self.rect = pygame.Rect(0, 0, self.width * 2, self.width * 2).move_to(center=rect.center)
 

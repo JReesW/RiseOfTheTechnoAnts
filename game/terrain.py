@@ -27,7 +27,7 @@ def create_terrain(width: int, height: int, seed: int):
 
     resource_map = normalize_noise_map(generate_noise_map(width, height, seed << 24, octaves=1, frequency=0.5))
 
-    print(f"noise map made: {time.perf_counter() - start}")
+    # print(f"noise map made: {time.perf_counter() - start}")
 
     # variables for level gen
     water_level = 0.30
@@ -91,7 +91,7 @@ def create_terrain(width: int, height: int, seed: int):
             else:
                 grid[y][x] = 1
 
-    print(f"biome grid made: {time.perf_counter() - start}")
+    # print(f"biome grid made: {time.perf_counter() - start}")
 
     return grid
 

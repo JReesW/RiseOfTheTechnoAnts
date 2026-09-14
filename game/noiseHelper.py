@@ -14,22 +14,22 @@ def generate_noise_map(width: int, height: int, seed: int, amplitude=1.0, freque
         x_array = np.arange(width) * frequency
         y_array = np.arange(height) * frequency
 
-        print(f"array creation: {time.perf_counter() - start}")
+        # print(f"array creation: {time.perf_counter() - start}")
 
         next_array = os.noise2array(x_array, y_array)
 
-        print(f"noise creation: {time.perf_counter() - start}")
+        # print(f"noise creation: {time.perf_counter() - start}")
 
         noise_array += next_array * amplitude
 
-        print(f"noise applying: {time.perf_counter() - start}")
+        # print(f"noise applying: {time.perf_counter() - start}")
 
         max_value += amplitude
 
         amplitude *= persistence
         frequency *= lacunarity
 
-    print(f"end time: {time.perf_counter() - start}")
+    # print(f"end time: {time.perf_counter() - start}")
 
     return noise_array / max_value
 

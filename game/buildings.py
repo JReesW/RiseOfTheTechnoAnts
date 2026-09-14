@@ -39,7 +39,6 @@ class Building(Entity):
     area: Area
 
     blacklist: list[int] = [0, 2, 5, 6]
-    max_health = 100  # TODO: ONLY ADD TO SUBCLASSES, NOT HERE
 
     def __init__(self, pos: Coords, allegiance: Allegiance, *groups):
         building_type = type(self)
@@ -113,6 +112,7 @@ class Nexus(Building):
     bottom_offset = 74
     area = Area.ThreeByThree
     sound = "nexus"
+    max_health = 1000
 
 
 class Pod(Building):
@@ -121,6 +121,7 @@ class Pod(Building):
     bottom_offset = 52
     area = Area.TwoByTwo
     sound = "pod"
+    max_health = 150
 
 
 class Tower(Building):
@@ -128,6 +129,7 @@ class Tower(Building):
     display_name = "Tower"
     bottom_offset = 50
     area = Area.TwoByTwo
+    max_health = 100
 
     def __init__(self, pos, allegiance, *groups):
         super().__init__(pos, allegiance, *groups)
@@ -150,6 +152,7 @@ class Farm(Building):
     display_name = "Fungus Farm"
     bottom_offset = 84
     area = Area.ThreeByThree
+    max_health = 300
 
 
 class Lumbermill(Building):
@@ -158,6 +161,7 @@ class Lumbermill(Building):
     display_name = "Lumbermill"
     bottom_offset = 94
     area = Area.ThreeByThree
+    max_health = 300
 
     def draw_shadow(self, surface: pygame.Surface, camera: Camera):
         cx, cy = isometric.world_to_screen_coords(*self.get_center(), camera)
@@ -171,6 +175,7 @@ class Foundry(Building):
     sound = "foundry"
     bottom_offset = 104
     area = Area.ThreeByThree
+    max_health = 300
 
     def draw_shadow(self, surface: pygame.Surface, camera: Camera):
         cx, cy = isometric.world_to_screen_coords(*self.get_center(), camera)
@@ -184,6 +189,7 @@ class Barracks(Building):
     display_name = "Barracks"
     bottom_offset = 104
     area = Area.ThreeByThree
+    max_health = 450
 
 
 class Siegery(Building):
@@ -192,3 +198,4 @@ class Siegery(Building):
     display_name = "Siegery"
     bottom_offset = 84
     area = Area.ThreeByThree
+    max_health = 600
