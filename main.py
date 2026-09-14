@@ -6,7 +6,7 @@ from engine import debug, director
 from settings import *
 
 pygame.init()
-pygame.freetype.init()
+freetype.init()
 
 
 screen = pygame.display.set_mode(
