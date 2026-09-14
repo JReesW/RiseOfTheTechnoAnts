@@ -4,7 +4,8 @@ import game.buildings as buildings
 flags = {
     "nothing": True,
     "can_make_queens": False,
-    "can_build_siegery": False
+    "can_build_siegery": False,
+    "can_make_alate": False
 }
 
 
@@ -14,6 +15,9 @@ class Action:
     available = True
     time: int
     required: str = "nothing"
+
+    def __init__(self, owner: buildings.Building):
+        self.owner = owner
 
     def onclick(self):
         pass
@@ -39,7 +43,8 @@ class ActionProcessor:
                 self.progress = 0
                 self.actions.pop(0)
 
-    def add(self, action: type[Action]):
+    def add(self, action: Action):
+        action.owner = self.owner
         self.actions.append(action)
         action.onstart()
 
@@ -132,6 +137,7 @@ class CreateAlate(Action):
     name = "alate"
     cost = (0, 0, 2, True)
     time = 240
+    required = "can_make_alate"
 
 
 class CreateMajor(Action):
@@ -167,3 +173,12 @@ class ResearchCybernetics(Upgrade):
 
     def onfinish(self):
         flags["can_build_siegery"] = True
+
+
+class ResearchPropulsion(Upgrade):
+    name = "propulsion"
+    cost = (1, 2, 3, False)
+    time = 600
+
+    def onfinish(self):
+        flags["can_make_alate"] = True

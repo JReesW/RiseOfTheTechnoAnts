@@ -140,6 +140,7 @@ class Unit(Entity):
     def update_animation(self, dt):
         if self.state == State.Idle: self.animation.play(f"Idle{self.direction}")
         elif self.state == State.Walking: self.animation.play(f"Walk{self.direction}")
+        elif self.state == State.Attacking: self.animation.play(f"Attack{self.direction}")
         self.animation.update(dt)
         self.image = self.animation.get_frame()
 
@@ -239,7 +240,7 @@ class Combatant(Unit):
     """
     Any unit that fights
     """
-    attack_delay = 5
+    attack_delay = 30
     damage: int
 
     def __init__(self, pos, allegiance, *groups):
@@ -280,6 +281,7 @@ class Combatant(Unit):
                 if math.dist(self.pos, target_pos) <= target_range:
                     self.state = State.Attacking
                     if self.delay == 0:
+                        self.delay += 1
                         target.hurt(self.damage)
                         if target.health <= 0:
                             # find new targets nearby

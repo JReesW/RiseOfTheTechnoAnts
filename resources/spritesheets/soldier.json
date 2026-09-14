@@ -36,6 +36,16 @@
                   "frames": ["WalkY0", "WalkY1", "WalkY2"],
                   "frameDurations": [100, 100, 100],
                   "loops": true
+            },
+            "AttackX": {
+                  "frames": ["AttackX0", "AttackX1", "AttackX2"],
+                  "frameDurations": [100, 100, 100],
+                  "loops": true
+            },
+            "AttackY": {
+                  "frames": ["AttackY0", "AttackY1", "AttackY2"],
+                  "frameDurations": [100, 100, 100],
+                  "loops": true
             }
       }
 }

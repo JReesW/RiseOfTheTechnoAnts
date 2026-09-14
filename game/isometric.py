@@ -34,12 +34,19 @@ def initialize_isometry(dimension: int, tile_width: int, tile_height: int):
     __settings["initialized"] = True
 
 
+def get_dimension() -> int:
+    if not __settings["initialized"]:
+        raise Exception("Please initialize the isometry settings before using")
+
+    return __settings["dimension"]
+
+
 def tile_size() -> tuple[int, int]:
     """
     Return the pixel size of the tiles
     """
     if not __settings["initialized"]:
-            raise Exception("Please initialize the isometry settings before using")
+        raise Exception("Please initialize the isometry settings before using")
 
     return __settings["tile_width"], __settings["tile_height"]
 

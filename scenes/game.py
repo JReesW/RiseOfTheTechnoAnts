@@ -86,7 +86,7 @@ class Game(Scene):
         director.global_data["units"] = self.units
         director.global_data["terrain"] = terrain
 
-        self.inventory = resources.Inventory(50, 50, 50, Allegiance.Player)
+        self.inventory = resources.Inventory(500, 500, 500, Allegiance.Player)
         self.enemy_inventory = resources.Inventory(50, 50, 50, Allegiance.Enemy)
         self.overlay = overlay.Overlay(terrain, self.camera, self.inventory)
         director.global_data["player_inventory"] = self.inventory
@@ -241,7 +241,12 @@ class Game(Scene):
         actions.BuildTower.onclick = partial(self.initiate_construction, buildings.Tower)
         actions.BuildNexus.onclick = partial(self.initiate_construction, buildings.Nexus)
 
-        actions.CreateWorker.onclick = partial(print, "Creating a worker :))))")
+        actions.CreateWorker.onfinish = lambda instance: instance.owner.spawn_unit(units.Worker)
+        actions.CreateQueen.onfinish = lambda instance: instance.owner.spawn_unit(units.Queen)
+        actions.CreateSoldier.onfinish = lambda instance: instance.owner.spawn_unit(units.Soldier)
+        actions.CreatePhrag.onfinish = lambda instance: instance.owner.spawn_unit(units.Phrag)
+        actions.CreateAlate.onfinish = lambda instance: instance.owner.spawn_unit(units.Alate)
+        actions.CreateMajor.onfinish = lambda instance: instance.owner.spawn_unit(units.Major)
 
     def select_entity(self, mouse: Coords):
         """

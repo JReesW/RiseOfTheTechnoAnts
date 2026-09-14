@@ -8,13 +8,7 @@
             "WalkX2": [96, 0, 38, 30],
             "WalkY0": [0, 48, 38, 30],
             "WalkY1": [48, 48, 38, 30],
-            "WalkY2": [96, 48, 38, 30],
-            "AttackX0": [0, 96, 38, 30],
-            "AttackX1": [48, 96, 38, 30],
-            "AttackX2": [96, 96, 38, 30],
-            "AttackY0": [0, 144, 38, 30],
-            "AttackY1": [48, 144, 38, 30],
-            "AttackY2": [96, 144, 38, 30]
+            "WalkY2": [96, 48, 38, 30]
       },
       "animations": {
             "IdleX": {
@@ -33,6 +27,16 @@
                   "loops": true
             },
             "WalkY": {
+                  "frames": ["WalkY0", "WalkY1", "WalkY2"],
+                  "frameDurations": [100, 100, 100],
+                  "loops": true
+            },
+            "AttackX": {
+                  "frames": ["WalkX0", "WalkX1", "WalkX2"],
+                  "frameDurations": [100, 100, 100],
+                  "loops": true
+            },
+            "AttackY": {
                   "frames": ["WalkY0", "WalkY1", "WalkY2"],
                   "frameDurations": [100, 100, 100],
                   "loops": true

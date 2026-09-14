@@ -1,9 +1,10 @@
 import pygame
 
-from engine import image, spritesheet, animation
+from engine import image, spritesheet, animation, director
 from engine.scene import Camera
-from game import isometric
+from game import isometric, units
 import game.actions as actions
+import game.pathfinding as pathfinding
 from game.entities import Entity
 from game.types import *
 
@@ -55,6 +56,7 @@ class Building(Entity):
         self.shadow = image.load_image(f"shadows/shadow{building_type.area}")
 
         self.action_processor = actions.ActionProcessor(self)
+        self.spawn_offset = 0
 
     def occupies_tile(self, tile: Coords) -> bool:
         """
@@ -77,11 +79,24 @@ class Building(Entity):
             return px + 80, py
         return px, py
 
-    def spawn_entity(self, entity: Entity):
+    def spawn_unit(self, unit: units.Unit):
         """
         Spawn an entity around this building
         """
-        pass
+        if self.area == Area.TwoByTwo:
+            positions = [(0, 1), (1, 1), (2, 1), (2, 0), (2, -1), (-1, 1), (2, -2), (1, -2), (0, -2), (-1, -2), (-1, -1), (-1, 0)]
+        else:
+            positions = [(-1, 2), (0, 2), (1, 2), (2, 2), (2, 1), (2, 0), (2, -1), (2, -2), (1, -2), (0, -2), (-1, -2), (-2, -2), (-2, -1), (-2, 0), (-2, 1), (-2, 2)]
+        for n in range(len(positions)):
+            dx, dy = positions[(n + self.spawn_offset) % len(positions)]
+            x, y = self.pos[0] + dx, self.pos[1] + dy
+            limit = isometric.get_dimension()
+            if 0 <= x < limit and 0 <= y < limit:
+                walkmap = pathfinding.create_walkable_map(director.global_data["terrain"], director.global_data["buildings"], [0, 2, 5, 6])
+                if walkmap[y][x] == 1:
+                    director.global_data["entities"].add(unit((x, y), self.allegiance, director.global_data["units"]))
+                    self.spawn_offset = (self.spawn_offset + 1) % 5
+                    return
 
     def update(self, dt):
         super().update(dt)

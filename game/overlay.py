@@ -10,7 +10,7 @@ actions_dictionary = {
     # buildings
     "nexus": [actions.CreateWorker, actions.CreateQueen, actions.ResearchArrhenotoky],
     "barracks": [actions.CreateSoldier, actions.CreatePhrag],
-    "siegery": [actions.CreateAlate, actions.CreateMajor],
+    "siegery": [actions.CreateMajor, actions.ResearchPropulsion, actions.CreateAlate],
     "foundry": [actions.ResearchCybernetics],
     # units
     "worker": [actions.BuildPod, actions.BuildFarm, actions.BuildLumbermill, actions.BuildFoundry, actions.BuildBarracks, actions.BuildSiegery, actions.BuildTower],
@@ -116,7 +116,7 @@ class Overlay:
                                 if action.time == 0 and self.inventory.buy(*action.cost):
                                     action.onclick()
                                 elif isinstance(self.selected_entity, buildings.Building) and len(self.selected_entity.action_processor.actions) < 5 and self.inventory.buy(*action.cost):
-                                    self.selected_entity.action_processor.add(action())
+                                    self.selected_entity.action_processor.add(action(self.selected_entity))
                         if action.name in self.tooltips:
                             self.current_tooltip = action.name
             return True
@@ -218,6 +218,7 @@ class Overlay:
 
         self.tooltips["arrhenotoky"] = (costly_tooltip("Arrhenotoky (Research)", (100, 50, 30), "Unlocks the creation of queens"), True)
         self.tooltips["cybernetics"] = (costly_tooltip("Cybernetics (Research)", (100, 50, 30), "Unlocks the creation of the siegery"), True)
+        self.tooltips["propulsion"] = (costly_tooltip("Jet Propulsion (Research)", (100, 50, 30), "Unlocks the creation of kamikaze alates"), True)
 
 
 def simple_tooltip(txt: str) -> pygame.Surface:
