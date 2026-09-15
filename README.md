@@ -28,7 +28,7 @@ This game was made by ***Lowland Palms***, a small team fronted by JReesW with h
  - ***Mondfuch-Marjulie*** - Soundtrack  
  - ***RDS*** - Gameplay dev
 
-Thanks to Lucysir for the team logo, and for help with the post processing!
+Thanks to Lucysir for the team logo!
 
 <hr>
 
