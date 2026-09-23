@@ -1,3 +1,8 @@
+"""
+Collection of custom types
+"""
+
+
 import enum
 
 

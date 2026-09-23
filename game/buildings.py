@@ -1,3 +1,8 @@
+"""
+Buildings, entities that are bound to the grid
+"""
+
+
 import pygame
 
 from engine import image, spritesheet, animation, director

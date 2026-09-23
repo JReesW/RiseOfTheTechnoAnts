@@ -1,14 +1,14 @@
+"""
+Entities, stored in one big group that draws only those in view of the camera and in correct order too
+"""
+
+
 import pygame
 
 from engine.scene import Camera
 from engine import colors, image
 from game import isometric
 from game.types import *
-
-
-"""
-Entities are stored in one big group that draws only those in view of the camera, and in correct order too
-"""
 
 
 class Entities(pygame.sprite.LayeredUpdates):

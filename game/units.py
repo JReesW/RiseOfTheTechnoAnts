@@ -1,3 +1,8 @@
+"""
+Units, entities that can move around freely on the map
+"""
+
+
 import pygame
 
 from engine import image, spritesheet, animation, director

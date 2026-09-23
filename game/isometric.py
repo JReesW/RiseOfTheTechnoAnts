@@ -1,10 +1,5 @@
 """
-Functions to help manage the isometric perspective of the game
-
-Handy info about the different coordinate spaces:
- - tile space is the integer space of the tiles' indices in the 2D terrain array
- - world space is the pixel coordinate on the entire world map
- - screen space is the pixel coordinate on the screen, relative to where the camera is
+Functions to help manage the isometric perspective of the game and to help with coordinate conversions
 """
 
 from engine.scene import Camera

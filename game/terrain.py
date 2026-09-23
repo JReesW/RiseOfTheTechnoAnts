@@ -1,17 +1,40 @@
-import pygame
+"""
+Terrain generation using OpenSimplex
+"""
+
 import random
-import time
 import math
-
-from game.noiseHelper import generate_noise_map, normalize_noise_map
-
 import numpy as np
+import opensimplex
 
 #IDs [water, plains, forest, team1, team2, bushes, ores]
 
-def create_terrain(width: int, height: int, seed: int):
-    start = time.perf_counter()
 
+def generate_noise_map(width: int, height: int, seed: int, amplitude=1.0, frequency=0.1, octaves=3, persistence=0.5, lacunarity=2.0):
+    noise_array = np.zeros([height, width])
+    os = opensimplex.OpenSimplex(seed)
+
+    max_value = 0
+
+    for _ in range(octaves):
+        x_array = np.arange(width) * frequency
+        y_array = np.arange(height) * frequency
+
+        next_array = os.noise2array(x_array, y_array)
+
+        noise_array += next_array * amplitude
+        max_value += amplitude
+
+        amplitude *= persistence
+        frequency *= lacunarity
+
+    return noise_array / max_value
+
+def normalize_noise_map(noise_array):
+    return (noise_array + 1) / 2
+
+
+def create_terrain(width: int, height: int, seed: int):
     # create edge distance map
     y, x = np.indices((height, width))
 
@@ -26,8 +49,6 @@ def create_terrain(width: int, height: int, seed: int):
     greenery_map = normalize_noise_map(generate_noise_map(width, height, seed << 16, octaves=1, frequency=0.15))
 
     resource_map = normalize_noise_map(generate_noise_map(width, height, seed << 24, octaves=1, frequency=0.5))
-
-    # print(f"noise map made: {time.perf_counter() - start}")
 
     # variables for level gen
     water_level = 0.30
@@ -46,7 +67,6 @@ def create_terrain(width: int, height: int, seed: int):
     # apply the edge distance map as effectively a slope map, then normilize it
     altitude_map += edge_distance * water_level
     altitude_map = altitude_map / altitude_map.max()
-
 
     # pick a random spot in the corners for the team regions
     ran = random.Random(seed)
@@ -91,10 +111,4 @@ def create_terrain(width: int, height: int, seed: int):
             else:
                 grid[y][x] = 1
 
-    # print(f"biome grid made: {time.perf_counter() - start}")
-
     return grid
-
-class Terrain():
-    def __init__(self, grid: list[list[int]]):
-        self.grid: list[list[int]] = grid

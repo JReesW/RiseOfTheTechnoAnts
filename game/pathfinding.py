@@ -1,3 +1,8 @@
+"""
+Pathfinding that allows entities to make their way across the map
+"""
+
+
 import pygame
 
 import game.buildings as _buildings

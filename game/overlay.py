@@ -1,3 +1,8 @@
+"""
+Overlay manager for the actions menu, resources, minimap, and unit selection
+"""
+
+
 import pygame
 
 from game import isometric, maps, resources, entities, units, buildings, actions

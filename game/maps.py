@@ -1,5 +1,5 @@
 """
-RENAME THIS FILE terrain.py / MERGE WITH RDS' TERRAIN CODE
+Map generation module, whether the large world map or the minimap
 """
 import pygame
 

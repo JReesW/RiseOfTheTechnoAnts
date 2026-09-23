@@ -1,3 +1,8 @@
+"""
+Resources, entities that represent the collectible resources on the map
+"""
+
+
 import pygame
 
 from engine import image
