@@ -196,7 +196,7 @@ class Game(Scene):
             img = image.load_image(f"buildings/{ghost.name}_ghost{invalid}")
             r = pygame.Rect(0, 0, *img.size)
             px, py = isometric.tile_to_screen_coords(*self.selector, self.camera)
-            ox = 80 if ghost.area == buildings.Area.TwoByTwo else 0
+            ox = 80 if ghost.area == Area.TwoByTwo else 0
             r = r.move_to(centerx = px + ox, bottom = py + ghost.bottom_offset)
             surface.blit(img, r)
 
@@ -207,7 +207,7 @@ class Game(Scene):
                 img = image.load_image(f"buildings/{ghost.name}_ghost")
                 r = pygame.Rect(0, 0, *img.size)
                 px, py = isometric.tile_to_screen_coords(*unit.task.pos, self.camera)
-                ox = 80 if ghost.area == buildings.Area.TwoByTwo else 0
+                ox = 80 if ghost.area == Area.TwoByTwo else 0
                 r = r.move_to(centerx = px + ox, bottom = py + ghost.bottom_offset)
                 surface.blit(img, r)
 

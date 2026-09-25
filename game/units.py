@@ -17,21 +17,6 @@ import enum, math
 qpi = lambda n: (math.pi / 4) * n
 
 
-class State(enum.IntEnum):
-    Idle = 0
-    Walking = 1
-    Building = 2
-    Gathering = 3
-    Attacking = 4
-
-
-class Direction(enum.StrEnum):
-    East = "X"
-    South = "XF"
-    West = "YF"
-    North = "Y"
-
-
 class Task:
     """"""
 
@@ -76,7 +61,7 @@ class Unit(Entity):
         self.pos = pos
         self.size = unit_type.size
         self.speed = unit_type.speed
-        self.state = State.Idle
+        self.state = UnitState.Idle
         self.direction = Direction.East
         self.target = None
         self.targets = []
@@ -126,9 +111,9 @@ class Unit(Entity):
         if self.target is not None:
             if math.dist(self.pos, self.target) < self.speed:
                 self.target = None
-                self.state = State.Idle
+                self.state = UnitState.Idle
             else:
-                self.state = State.Walking
+                self.state = UnitState.Walking
                 tx, ty = self.target
                 px, py = self.pos
                 theta = math.atan2(ty-py, tx-px)
@@ -143,9 +128,9 @@ class Unit(Entity):
                 self.rect = self.rect.move_to(center=isometric.tile_to_world_coords(*self.pos, floating=True))
 
     def update_animation(self, dt):
-        if self.state == State.Idle: self.animation.play(f"Idle{self.direction}")
-        elif self.state == State.Walking: self.animation.play(f"Walk{self.direction}")
-        elif self.state == State.Attacking: self.animation.play(f"Attack{self.direction}")
+        if self.state == UnitState.Idle: self.animation.play(f"Idle{self.direction}")
+        elif self.state == UnitState.Walking: self.animation.play(f"Walk{self.direction}")
+        elif self.state == UnitState.Attacking: self.animation.play(f"Attack{self.direction}")
         self.animation.update(dt)
         self.image = self.animation.get_frame()
 
@@ -284,7 +269,7 @@ class Combatant(Unit):
                     target_range = target.area / 2
 
                 if math.dist(self.pos, target_pos) <= target_range:
-                    self.state = State.Attacking
+                    self.state = UnitState.Attacking
                     if self.delay == 0:
                         self.delay += 1
                         target.hurt(self.damage)
@@ -298,7 +283,7 @@ class Combatant(Unit):
                                 self.task = Attack(new_target)
                             else:
                                 self.task = None
-                                self.state = State.Idle
+                                self.state = UnitState.Idle
                     else:
                         self.delay += 1
                         if self.delay == 5: self.delay = 0
@@ -382,7 +367,7 @@ class Alate(Combatant):
                 target_range = target.area / 2
 
                 if math.dist(self.pos, target_pos) <= target_range:
-                    self.state = State.Attacking
+                    self.state = UnitState.Attacking
                     if self.delay == 0:
                         target.hurt(self.damage)
                         if target.health <= 0:

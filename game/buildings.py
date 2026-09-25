@@ -16,12 +16,6 @@ from game.types import *
 import enum
 
 
-class Area(enum.IntEnum):
-    OneByOne = 1
-    TwoByTwo = 2
-    ThreeByThree = 3
-
-
 def blocked_tiles(walkmap: Tilemap, pos: Coords, building_type: type[Building]) -> list[Coords]:
     blocked = []
     bx, by = pos

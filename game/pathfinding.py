@@ -39,8 +39,8 @@ def create_walkable_map(terrain: Tilemap, buildings: pygame.sprite.Group[_buildi
     for building in [b for b in buildings if b != goal_building]:
         bx, by = building.pos
         x1, x2, y1, y2 = 0, 0, 0, 0
-        if building.area >= _buildings.Area.TwoByTwo: x2, y1 = 1, -1
-        if building.area == _buildings.Area.ThreeByThree: x1, y2 = -1, 1
+        if building.area >= Area.TwoByTwo: x2, y1 = 1, -1
+        if building.area == Area.ThreeByThree: x1, y2 = -1, 1
         for y in range(y1, y2+1):
             for x in range(x1, x2+1):
                 walkmap[by + y][bx + x] = 0
